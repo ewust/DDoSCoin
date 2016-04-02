@@ -5,6 +5,7 @@
 #include <openssl/sha.h>
 #include <openssl/pem.h>
 #include <openssl/rsa.h>
+#include <assert.h>
 
 size_t make_client_hello(uint8_t *random, uint8_t **client_hello)
 {
@@ -108,6 +109,45 @@ size_t receive_tls_record(int sock, uint8_t **record)
     return len;
 }
 
+size_t get_tls_record(struct evbuffer *input, uint8_t **record)
+{
+    struct tls_record_header hdr;
+    *record = NULL;
+
+    if (evbuffer_get_length(input) < sizeof(hdr)) {
+        return 0;
+    }
+
+    evbuffer_copyout(input, &hdr, sizeof(hdr));
+    hdr.version = ntohs(hdr.version);
+    hdr.length = ntohs(hdr.length);
+
+    // No int overflow on 5 + 16-bit number...right?!?
+    if (evbuffer_get_length(input) < (sizeof(hdr) + hdr.length)) {
+        return 0;
+    }
+
+    // remove the length you read
+    evbuffer_drain(input, sizeof(hdr));
+
+    *record = malloc(sizeof(hdr) + hdr.length);
+    assert(*record != NULL);
+
+
+    // Copy in the contents
+    size_t ret = evbuffer_remove(input, *record, hdr.length);
+    if (ret != hdr.length) {
+        printf("evbuffer_remove failed in get_tls_record, got %lu bytes, wanted %d\n", ret, hdr.length);
+        free(*record);
+        *record = NULL;
+        return 0;
+    }
+
+    return ret;
+}
+
+
+
 
 // This will count extensions, but not parse them (we have to count how many there
 // are before we allocate, so we make a dumb 2-pass in parse_tls_extensions on the
@@ -146,6 +186,8 @@ int parse_server_hello(uint8_t *server_hello, size_t len, struct server_hello *s
     sh->extensions_data = p;
     p += ext_len;
 
+    // This technically shouldn't be the check...sometimes records
+    // can contain multiple handshakes :/
     if ((p - server_hello) != len) {
         return -1;
     }

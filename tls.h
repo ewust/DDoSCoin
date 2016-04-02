@@ -5,6 +5,10 @@
 #include <unistd.h>
 #include <stdint.h>
 
+#include <event2/event.h>
+#include <event2/bufferevent.h>
+#include <event2/buffer.h>
+#include <event2/util.h>
 
 #define TLS_RECORD_TYPE_HANDSHAKE   0x16
 #define TLS_RECORD_VERSION_1_0      0x0301
@@ -135,6 +139,7 @@ struct server_keyx {
 size_t make_client_hello(uint8_t *random, uint8_t **client_hello);
 
 size_t receive_tls_record(int sock, uint8_t **record);
+size_t get_tls_record(struct evbuffer *input, uint8_t **record);
 
 int parse_server_hello(uint8_t *server_hello, size_t len, struct server_hello *sh);
 
