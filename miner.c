@@ -10,6 +10,23 @@
 #include <openssl/pem.h>
 #include "tls.h"
 
+// 32-byte prev_block_hash (SHA256(prev_block))
+// 32-byte merkle_root
+// 32-byte nonce
+// TODO: precompute hash over first two, only append hash of nonce (length-extend)
+// for faster computation!
+void generate_client_random(uint8_t *prev_block_hash, uint8_t *merkle_root,
+                            uint8_t *nonce, uint8_t **client_random)
+{
+    *client_random = malloc(SHA256_DIGEST_LENGTH);
+
+    SHA256_CTX ctx;
+    SHA256_Init(&ctx);
+    SHA256_Update(&ctx, prev_block_hash, 32);
+    SHA256_Update(&ctx, merkle_root, 32);
+    SHA256_Update(&ctx, nonce, 32);
+    SHA256_Final(*client_random, &ctx);
+}
 
 
 int make_connection(uint8_t *random)
