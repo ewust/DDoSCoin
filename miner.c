@@ -25,6 +25,8 @@ struct config {
     uint8_t     prev_block_hash[32];
     uint8_t     merkle_root[32];
 
+    uint8_t     difficulty[32];
+
     size_t      num_connections;
 
     // TODO: remove
@@ -112,21 +114,27 @@ void handle_cert(struct conn_state *st)
     // TODO: parse cert
 }
 
-int satisfies_proof_of_work(struct conn_state *st)
+int satisfies_proof_of_work(uint8_t *server_dh_params, size_t server_dh_params_len,
+                            uint8_t *sig, size_t sig_len,
+                            uint8_t *nonce, uint8_t *difficulty)
 {
     uint8_t digest[SHA256_DIGEST_LENGTH];
     SHA256_CTX ctx;
     SHA256_Init(&ctx);
-    SHA256_Update(&ctx, st->skeyx.server_dh_params, st->skeyx.server_dh_params_len);
-    SHA256_Update(&ctx, st->skeyx.sig, st->skeyx.sig_len);
-    SHA256_Update(&ctx, st->nonce, 32);
+    SHA256_Update(&ctx, server_dh_params, server_dh_params_len);
+    SHA256_Update(&ctx, sig, sig_len);
+    SHA256_Update(&ctx, nonce, 32);
     SHA256_Final(digest, &ctx);
 
     print_hex("   difficulty: ", digest, SHA256_DIGEST_LENGTH);
-    if (digest[0] == 0x00) {
-        return 1;
+    int i;
+    for (i=0; i<SHA256_DIGEST_LENGTH; i++) {
+        if (digest[i] < difficulty[i]) {
+            return 1;
+        } else if (digest[i] > difficulty[i]) {
+            return 0;
+        }
     }
-    
     return 0;
 }
 
@@ -157,12 +165,15 @@ void handle_keyx(struct conn_state *st)
     }
 
     // Check if it passes the test
-    if (satisfies_proof_of_work(st)) {
+    if (satisfies_proof_of_work(st->skeyx.server_dh_params, st->skeyx.server_dh_params_len,
+                            st->skeyx.sig, st->skeyx.sig_len, st->nonce, st->conf->difficulty)) {
         printf("Winner!\n");
         print_hex("nonce: ", st->nonce, 32);
         print_hex("server_random: ", st->shello.random, 32);
         print_hex("server_dh_params: ", st->skeyx.server_dh_params, st->skeyx.server_dh_params_len);
         print_hex("sig: ", st->skeyx.sig, st->skeyx.sig_len);
+
+        exit(0);
     }
     cleanup(st);
 }
@@ -290,6 +301,10 @@ int main()
     // Dummy values
     memset(conf.prev_block_hash, 0xAA, 32);
     memset(conf.merkle_root, 0xBB, 32);
+    memset(conf.difficulty, 0x00, 32);
+    conf.difficulty[0] = 0x00;
+    conf.difficulty[1] = 0xa7;
+
 
     // Load RSA key
     FILE *fp = fopen("./ericw.us.pub", "rb");
@@ -306,11 +321,9 @@ int main()
 
     conf.base = event_base_new();
 
-    fetcher(&conf, 1);
+    fetcher(&conf, 100);
 
     event_base_dispatch(conf.base);
-
-
 
     return 0;
 }
