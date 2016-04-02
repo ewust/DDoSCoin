@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <netdb.h>
 #include <netinet/in.h>
+#include <openssl/pem.h>
 #include "tls.h"
 
 
@@ -42,8 +43,8 @@ int make_connection(uint8_t *random)
     uint8_t *cert;
     size_t cert_len = receive_tls_record(sock, &cert);
 
-    uint8_t *server_keyx;
-    size_t server_keyx_len = receive_tls_record(sock, &server_keyx);
+    uint8_t *s_keyx;
+    size_t server_keyx_len = receive_tls_record(sock, &s_keyx);
 
     // verify server keyx with cert
     struct server_hello shello;
@@ -52,13 +53,33 @@ int make_connection(uint8_t *random)
         return -1;
     }
 
+
+    struct server_keyx sk;
+    memset(&sk, 0, sizeof(sk));
+    if (parse_server_keyex(s_keyx, server_keyx_len, shello.cipher_suite, &sk) < 0) {
+        printf("bad server keyx\n");
+        return -1;
+    }
+
+    // TODO get this from cert instead (and verify cert)
+    //EVP_PKEY *pkey;
+    FILE *fp = fopen("./ericw.us.pub", "rb");
+    //PEM_read_PUBKEY(fp, &pkey, NULL, NULL);
+    RSA *pkey = NULL;
+    PEM_read_RSA_PUBKEY(fp, &pkey, NULL, NULL);
+    if (pkey == NULL) {
+        printf("Error couldn't read public key\n");
+        return -1;
+    }
+
+    verify_server_keyex(random, shello.random, &sk, pkey);
+
     int i;
     printf("server random: ");
     for (i=0; i<32; i++) {
         printf("%02x", shello.random[i]);
     }
     printf("\n");
-
 }
 
 

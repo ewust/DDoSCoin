@@ -2,6 +2,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <openssl/sha.h>
+#include <openssl/pem.h>
+#include <openssl/rsa.h>
 
 size_t make_client_hello(uint8_t *random, uint8_t **client_hello)
 {
@@ -194,4 +197,75 @@ int parse_tls_extensions(struct server_hello *sh)
         return -1;
     }
     return 0;
+}
+
+int parse_server_keyex(uint8_t *server_keyx, size_t len, uint16_t cipher_suite,
+                    struct server_keyx *sk)
+{
+    uint8_t *p = server_keyx;
+    if (r1_safe(server_keyx, p, len) != TLS_HANDSHAKE_TYPE_SERVER_KEYX) {
+        return -1;
+    }
+
+    uint32_t hs_len = r3_safe(server_keyx, p, len);
+
+    if (cipher_suite != TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) {
+        // Only support this for now :(
+        return -1;
+    }
+
+    sk->server_dh_params = p;
+
+    sk->curve_type = r1_safe(server_keyx, p, len);
+    sk->named_curve = r2_safe(server_keyx, p, len);
+    sk->public_point_len = r1_safe(server_keyx, p, len);
+    sk->public_point = p;
+    p += sk->public_point_len;
+
+    sk->server_dh_params_len = (p - sk->server_dh_params);
+
+
+    sk->sig_alg = r2_safe(server_keyx, p, len);
+
+    sk->sig_len = r2_safe(server_keyx, p, len);
+    sk->sig = p;
+    p += sk->sig_len;
+
+    if ((p - server_keyx) != len) {
+        return -1;
+    }
+
+    return 0;
+}
+
+int verify_server_keyex(uint8_t *crandom, uint8_t *srandom,
+                    struct server_keyx *sk, RSA *key)
+{
+
+
+    // TODO: support other things besides RSA/SHA512: base off sk->sig_algs
+    // RSA on the signature to get the expected hash
+    uint8_t out_buf[2048];
+    size_t out_len = RSA_public_decrypt(sk->sig_len, sk->sig,
+                                        out_buf, key, RSA_PKCS1_PADDING);
+
+    // We could parse the ASN, or, we could just look at the last 64-bytes...
+    uint8_t *sig_digest = &out_buf[out_len - SHA512_DIGEST_LENGTH];
+
+    // Calculate hash
+    unsigned char digest[SHA512_DIGEST_LENGTH];
+    SHA512_CTX ctx;
+    SHA512_Init(&ctx);
+    SHA512_Update(&ctx, crandom, 32);
+    SHA512_Update(&ctx, srandom, 32);
+    SHA512_Update(&ctx, sk->server_dh_params, sk->server_dh_params_len);
+    SHA512_Final(digest, &ctx);
+
+    // Don't need to be safe, no secrets here
+    if (memcmp(sig_digest, digest, SHA512_DIGEST_LENGTH) == 0) {
+        printf("success!\n");
+        return 1;
+    } else {
+        return 0;
+    }
 }

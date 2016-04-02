@@ -75,6 +75,26 @@ struct server_hello {
     struct tls_extension **extensions;
 };
 
+struct server_keyx {
+    uint8_t     *server_dh_params;
+    size_t      server_dh_params_len;
+
+    // ECDHE/named curve specific
+    uint8_t     curve_type;
+    uint16_t    named_curve;
+    uint8_t     public_point_len;
+    uint8_t     *public_point;
+
+
+    uint16_t    sig_alg;
+    size_t      sig_len;
+    uint8_t     *sig;
+
+};
+
+
+
+
 // This is a GCC statement expression; allows us to bail (with a return -1)
 // if some condition isn't met (i.e. you're reading off the end of the buffer)
 // but otherwise return a value. Sort of like an inline function, but with the ability
@@ -119,4 +139,15 @@ size_t receive_tls_record(int sock, uint8_t **record);
 int parse_server_hello(uint8_t *server_hello, size_t len, struct server_hello *sh);
 
 int parse_tls_extensions(struct server_hello *sh);
+
+
+int parse_server_keyex(uint8_t *server_keyx, size_t len, uint16_t cipher_suite,
+                    struct server_keyx *sk);
+
+
+
+
+
 #endif
+
+
