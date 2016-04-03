@@ -19,6 +19,24 @@
 
 #define TIMEOUT_SECS 3
 
+struct block {
+    uint8_t     nonce[32];
+    uint8_t     server_random[32];
+    uint8_t     prev_block_hash[SHA256_DIGEST_LENGTH];
+    uint8_t     merkle_root[SHA256_DIGEST_LENGTH];
+    uint8_t     difficulty[SHA256_DIGEST_LENGTH];
+
+    // Variable-lengths
+    uint16_t    server_dh_params_len;
+    uint8_t     *server_dh_params;
+
+    uint16_t    sig_len;
+    uint8_t     *sig;
+
+    uint16_t    cert_len;
+    uint8_t     *cert;
+};
+
 struct config {
     struct event_base *base;
 
@@ -55,6 +73,8 @@ struct conn_state {
 
     struct server_hello shello;
     struct server_keyx  skeyx;
+    uint16_t            cert_len;
+    uint8_t             *cert;
 };
 
 void cleanup(struct conn_state *st);
@@ -148,6 +168,28 @@ void print_hex(char *prefix, uint8_t *d, size_t len)
     printf("\n");
 }
 
+
+void make_block_from_state(struct conn_state *st, struct block *b)
+{
+    memcpy(b->nonce, st->nonce, 32);
+    memcpy(b->server_random, st->shello.random, 32);
+    memcpy(b->prev_block_hash, st->conf->prev_block_hash, SHA256_DIGEST_LENGTH);
+    memcpy(b->merkle_root, st->conf->merkle_root, SHA256_DIGEST_LENGTH);
+    memcpy(b->difficulty, st->conf->difficulty, SHA256_DIGEST_LENGTH);
+
+    b->server_dh_params_len = st->skeyx.server_dh_params_len;
+    b->server_dh_params = malloc(b->server_dh_params_len);
+    memcpy(b->server_dh_params, st->skeyx.server_dh_params, st->skeyx.server_dh_params_len);
+
+    b->sig_len = st->skeyx.sig_len;
+    b->sig = malloc(b->sig_len);
+    memcpy(b->sig, st->skeyx.sig, b->sig_len);
+
+    b->cert_len = st->cert_len;
+    b->cert = malloc(b->cert_len);
+    memcpy(b->cert, st->cert, b->cert_len);
+}
+
 void handle_keyx(struct conn_state *st)
 {
     struct evbuffer *input = bufferevent_get_input(st->bev);
@@ -167,6 +209,9 @@ void handle_keyx(struct conn_state *st)
     // Check if it passes the test
     if (satisfies_proof_of_work(st->skeyx.server_dh_params, st->skeyx.server_dh_params_len,
                             st->skeyx.sig, st->skeyx.sig_len, st->nonce, st->conf->difficulty)) {
+
+        struct block new_block;
+        make_block_from_state(st, &new_block);
         printf("Winner!\n");
         print_hex("nonce: ", st->nonce, 32);
         print_hex("server_random: ", st->shello.random, 32);
