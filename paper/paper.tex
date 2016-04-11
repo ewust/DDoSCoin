@@ -1,0 +1,126 @@
+\input{headers}
+
+
+\begin{abstract}
+
+Since its creation in 2009, Bitcoin has used a hash-based proof-of-work to
+generate new blocks, and create a single public ledger of transactions. The
+hash-based computational puzzle employed by Bitcoin is instrumental to its
+security, preventing sybill attacks and making double-spending attacks more
+difficult. However, there have been concerns over the efficiency of this
+proof-of-work puzzle, and alternative ``useful'' proofs have been proposed.
+
+In this paper, we present DDoSCoin, which is a cryptocurrency with a
+\emph{mallicious} proof-of-work. DDoSCoin allows miners to prove that they have
+contributed to a distributed denial of service attack against a specific target.
+This proof involves making a large number of TLS connections to a target server,
+and using infrequent cryptographic responses as a proof.
+
+
+
+\end{abstract}
+
+
+
+
+\section{Introduction}
+
+Cryptocurrencies rely on proofs-of-work (PoW) that
+require miners to spend a large amount of effort to solve a specific puzzle,
+such that once solved, allowing others to inexpensively verify the solution is a
+valid one. In Bitcoin, the proof-of-work is a computational puzzle based on the
+SHA256 hash function, and miners are tasked with finding a partial preimage. The
+only known way to do this is to iterate over a large number of inputs to the
+hash function, and check if the output hash is less than a specified target. In
+simplified terms, to find an input that hashes to N bits of 0s, the miner must
+perform on average $2^{N}$ hashes. However, once found, other miners and Bitcoin
+nodes can verify the puzzle solution with
+a single hash~\footnote{Bitcoin uses double-SHA256 in its design, but this
+detail is not important for the purposes of this paper.}.
+
+
+Although the proof-of-work used in Bitcoin gives it resistance to sybil attacks,
+the amount of computational effort carried out collectively by its miners does
+not contribute to any problems besides securing the currency from attack.
+Indeed, this computational effort is substantial: As of 2016, miners
+collectively perform roughly $10^{18}$ (or about $2^{60}$) hashes every
+second~\cite{blockchain}.
+
+Previously, researchers have proposed alternative cryptocurrencies (altcoins)
+that aim to have more beneficial proofs-of-work~\cite{primecoin,permacoin} that
+provide utility beyond securing the underlying currency. In this paper however,
+we investigate going in the opposite direction, and propose an altcoin that has
+a \emph{malicious} proof-of-work that is externally detrimental.
+
+In particular, we propose a proof-of-work that allows miners to prove they have
+participated in a distributed denial of service (DDoS) attack against a
+particular target. Miners are incentivized to send and receive large amounts of network
+traffic at the target in order to produce a valid proof-of-work. As in other
+cryptocurrencies, these proofs can be inexpensively verified by others, and the
+original miner can collect a reward. This reward can be sold for other
+currencies (including Bitcoin or even traditional currencies), allowing botnet
+owners and other attacks to directly collect revenue for their assistance
+in a decentralized DDoS attack.
+
+
+The malicious proof-of-work operates by having miners create a large number of
+TLS connections to a target webserver, and using the server's signed responses
+as a proof of connection. In modern versions of TLS, the server signs a
+client-provided parameter of the connection, along with server-provided values
+used in the key exchange of the connection. This allows the client to prove to
+others that it has communicated with the server. In addition, the signed value
+returned by the server is not predictable to the client, and is randomly
+distributed. Thus, clients can use a similar trick as in Bitcoin, and only
+report connections that match some rare threshold, such as the signature from
+the server starts with $N$ bits of 0s. On average, it will take clients $2^{N}$
+connections to produce such a proof.
+
+Although the malicious proof-of-work only works against websites that support
+TLS 1.2, as of April 2016, over 51\% of the Alexa top million websites support
+this version of TLS~\cite{censys}. Furthermore, we expect this number to
+increase as TLS support becomes more widespread~\cite{letsencrypt}.
+
+\emph{Contributions}
+\begin{itemize}
+\item Propose a novel conceptual cryptocurrency, DDoSCoin, whose proof-of-work
+incentives miners to participate in a DDoS attack, and prove they have done so.
+\item Implement our proof-of-work function and evaluate its performance.
+\item Discuss and estimate the impact such a cryptocurrency would have if
+deployed, and outline defenses.
+\end{itemize}
+
+Section blah does blah, and Section blat describes blat.
+
+
+
+
+
+\section{Related Work}
+
+Ethereum
+Permacoin
+Primecoin
+Other interesting proofs-of-work?
+
+Botnet-as-a-service
+
+\section{Background}
+
+\section{DDoSCoin Design}
+
+\section{Discussion}
+
+-Proof of (burnt) bandwidth
+-Defenses
+-Target server's participation
+
+
+\section{Conclusion}
+
+
+
+{\footnotesize\balance
+\bibliographystyle{plain}
+\bibliography{paper}}
+
+\end{document}

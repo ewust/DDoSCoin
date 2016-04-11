@@ -1,0 +1,107 @@
+% Usenix submission:
+%   13-pages, excluding bibliography and well-marked appendices
+%   (no more than 16 pp. long)
+
+
+\documentclass[letterpaper,twocolumn,10pt]{article}
+\usepackage{usenix}
+\usepackage[T1]{fontenc}
+\usepackage[%
+    breaklinks=true,colorlinks=true,linkcolor=black,%
+     citecolor=black,urlcolor=black,bookmarks=true,bookmarksopen=false,%
+    pdfauthor={},
+    pdftitle={DDosCoin}
+    ,pdftex]{hyperref}
+\usepackage{amsmath,amssymb,amsbsy}
+\usepackage{wasysym}
+\usepackage{longtable}
+\usepackage{mathptmx}\renewcommand{\ttdefault}{cmtt}
+\usepackage[margin=0pt]{caption}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{xcolor}
+\usepackage{tablefootnote}
+\usepackage{longtable}
+\usepackage{color}
+\usepackage{url}\urlstyle{rm}
+\usepackage[margin=1in]{geometry}
+\usepackage{watermark}
+\usepackage{booktabs}
+\usepackage{listings}
+\usepackage{cite}
+\usepackage{paralist}
+\usepackage{balance}
+\usepackage{tabularx}
+\usepackage[protrusion=true,expansion=true,kerning]{microtype}
+\usepackage{algorithm, algorithmic}
+\usepackage{multirow}
+\usepackage{placeins}
+\usepackage{pgfplots}
+%\usepackage{wrapfig}
+\usepackage{colortbl}
+\usepackage{bigstrut}
+\usepackage{subcaption}
+\newcommand{\specialcell}[2][c]{%
+  \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+\usepackage{float}
+
+\newcommand{\ind}{\hspace*{1em}}
+
+%\hyphenpenalty=62
+
+\marginparwidth 36pt
+\newcommand{\mn}[1]{\marginpar{\scriptsize \raggedright #1}}
+
+% Paragraph and subpar
+\renewcommand{\paragraph}[1]{\medskip\noindent\textbf{#1}\quad}
+\newcommand{\subpar}[1]{\medskip\noindent\textsl{#1}\enspace}
+
+% Fix ugly USENIX subsection headings (AH 3/08)
+\makeatletter
+\renewcommand{\section}{\@startsection {section}{1}{\z@}%
+                                   {-3.5ex plus-1ex minus -.2ex}%
+                                   {2.3ex plus.2ex}%
+                                   {\normalfont\large\bfseries}}
+\renewcommand{\subsection}{\@startsection{subsection}{2}{\z@}%
+                                     {-2.5ex plus-.7ex minus -.2ex}%
+                                     {1.5ex plus .2ex}%
+                                     {\normalfont\fontsize{11}{12.5}\bfseries}}
+\makeatother
+
+\clubpenalty10000
+
+% Stop URLs from hyphenating after  "http:" (AH 12/08)
+\def\UrlBreaks{\do-\do\.\do\@\do\\\do\!\do\_\do\|\do\;\do\>\do\]%
+ \do\)\do\,\do\?\do\'\do+\do\=\do\#}
+\def\UrlBigBreaks{\do\:\do\/}%
+
+% TODO, TK, etc. (AH 4/12)
+\usepackage{xspace}
+\newcommand{\todo}[1]{{\color{red}{\textbf{\em [TODO: #1]}}}\xspace}
+\newcommand{\TODO}[1]{\todo{#1}}
+\newcommand{\tk}{{\color{red}{\bf TK}}\xspace}
+\newcommand{\TK}{\tk}
+\newcommand{\comment}[1]{\relax} % comment out text
+\newcommand{\xcite}[1]{\relax} % comment out citation
+
+    %\thiswatermark{\parbox{\textwidth}{\vskip30pt\centering
+    %\vspace*{-20pt}%
+    % This paper appeared in \emph{Proceedings of the 9th {\small USENIX} Workshop on Offensive Technologies (WOOT)}, August~2015.\\
+    % Source code and an online demonstration are available at \href{https://keysforge.com/}{{\bf https://keysforge.com/}}.\\
+    %\vskip6pt
+    %\rule[\baselineskip]{\textwidth}{0.5pt}
+    %}}
+
+\pagestyle{plain}
+\thispagestyle{empty}
+\begin{document}
+
+\title{DDoSCoin: Cryptocurrency with a Malicious Proof-of-Work}
+
+\author{\rm{Eric Wustrow}\\
+University of Colorado, Boulder\\
+{\small ewust@colorado.edu}
+}
+
+\maketitle
+
