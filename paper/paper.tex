@@ -106,6 +106,75 @@ Botnet-as-a-service
 
 \section{Background}
 
+\subsection{Proof-of-Stake}
+
+Proof-of-Stake is an alternate way of generating new blocks in a cryptocurrency.
+In this system, blocks are ``minted'' (rather than mined) based on how much
+stake the miner has in the currency (rather than their fraction of computational
+power). Proof-of-stake assumes that the underlying cryptocurrency is already
+somewhat distributed, for example through the use of a traditional proof-of-work
+system. In this subsection, we will describe Peercoin, a currently active
+alternate cryptocurrency that employs a hybrid proof-of-work and proof-of-stake
+algorithm to mint blocks.
+
+Peercoin's proof-of-stake allows currency holders to mint new blocks based on
+how many coin-days they are able and willing to consume. ``Coin-days
+consumed'' is a measure of the product of the amount of coins spent, and the
+number of days the have not been previously spent. For example, to consume 10
+coin-days, a currency holder can spend 10 Peercoin that they have held for a
+day, or equivalently, spend 5 Peercoins that were last spent 2 days ago. Note
+that the holder can send these coins to anyone (including themselves) in order
+to consume the coin age.
+
+To mint a new block, a minter creates a special transaction (presumably one
+where the minter pays themself) where one of the
+inputs has been unspent for at least 30 days. The resulting transaction, along
+with a timestamp, must meet a certain hash target that gets easier proportional to how many
+coin-days are consumed. For example, if the current difficulty gives a minter
+consuming 100 coin-days a 1\% chance of minting a block per second, a minter
+that was able to consume 200 coin-days would have a 2\% chance per second.
+
+The input to the hash includes information about the ``aged'' transaction, as
+well as a current timestamp\footnote{In recent versions of Peercoin, the hash
+also includes a stakeModifier which is computed from recent blocks; however,
+these details are not important for our purposes}. If this hash is less than the
+current target multiplied by the number of coin-days consumed in the
+transaction, then the transaction meets the proof-of-stake difficulty and a new
+block is minted. Although this looks similar to a proof-of-work check where a
+hash is being compared to a target, here the only varying inputs are the
+long-lived (aged) input transaction, and a corse-grained timestamp with a
+resolution of 1 second. Thus, for each aged unspent transaction output they
+control, minters perform only one hash per second in order to solve the
+proof-of-stake.
+
+% hash(nStakeModifier + txPrev.block.nTime + txPrev.offset + txPrev.nTime +
+%       txPrev.vout.n + nTime) < bnTarget * nCoinDayWeight
+%
+% ss << nTimeBlockFrom << nTxPrevOffset << txPrev.nTime << prevout.n <<
+%   nTimeTx;
+% given a new tx that is going to be my "proof-of-stake" tx,
+% which has an input from prevTx (where prevTx is at least 30 days old)
+% H(nStakeModifier + txPrev.block.nTime + txPrev.offset + txPrev.nTime +
+%   txPrev.vout.n + tx.nTime)
+
+% stakeModifiers (in v0.3): you start from the block where txPrev was in,
+% and then walk forward until the first block that was made more than
+% GetStakeModifierSelectionInterval() seconds after that the block txPrev was in (about 8.8 days...)
+% If that block has the stakeModifier flag set, use its stakeModifier
+
+
+% Ist das system relevant?
+In Peercoin, coins cannot age beyond 90-days; coins that have not been consumed
+after 90-days are counted as 90-day-old coins. This prevents very old
+coin-holders from being able to disrupt the blockchain at a future date,
+potentially causing a large fork of the blockchain and destabalizing it.
+
+When a proof-of-stake is minted, the minter is allowed to collect a small
+subsidy proportional to the coin-age consumed in their proof-of-stake
+transaction. This serves as the only reward for a minter, as transaction fees are not
+collected by minters in Peercoin.
+
+
 \section{DDoSCoin Design}
 
 Miners in DDoSCoin repeatedly create connections to a TLS victim server, and
