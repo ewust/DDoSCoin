@@ -303,13 +303,15 @@ Although not yet implemented, the TLS 1.3 proposal appears to also have ... \TK
 \label{sec:victim}
 
 If DDoSCoin accepted proofs against any TLS 1.2 server, miners would be
-incentivized to solve local challenges rather than remote ones, leading to the
-proof-of-work being a computational puzzle, rather than one based on
+incentivized to set up signed TLS servers locally, and focus exclusively on
+solving those challenges instead of remote ones, leading to the
+proof-of-work being a computational puzzle rather than one based on
 participation in a network denial of service. Thus, DDoSCoin must have a way to
 agree on what victims are acceptable targets for the proofs-of-work to be considered
-valid.
+valid. Similarly, it is important to focus the denial-of-service effort toward a
+single or small number of victims in order to have the most impact.
 
-One simple way is to hardcode a set of victim certificates into the protocol.
+One simple way to is to hardcode a set of victim certificates into the protocol.
 For example, DDoSCoin's published code could contain the identities of
 Facebook's servers, and only incentivize attacks against them. However, there
 are many attackers that might feel uncomfortable attacking Facebook, but would
@@ -323,47 +325,109 @@ would be no way to safely transact them.
 These issues lead to a few subtle requirements for choosing valid victims.
 First, there must be \emph{limits} on who is allowed to be a victim, otherwise
 miners can create local computational puzzles. At the same time, there must be
-\emph{enough} targets in order to be robust. Similarly, the list of victims must
-be \emph{flexible} in order to prevent a stalled blockchain through downed or
-propery defended servers.
+\emph{enough} targets in order to be robust against stalled blockchains.
+Similarly, the list of victims must be \emph{flexible} in order to allow
+removing targets as they become impractical to attack (either
+through successful attack or mitigation), and adding new ones.
 
 To address these issues, we propose two mechanisms the DDoSCoin protocol can
-employ.
+employ to allow victims to be selected by concensus.
 
 
 \subsubsection{Pay-to-DDoS}
 
-In order to allow the set of victims to be updated, DDoSCoin could allow payment
-for targetting specific servers. To accomplish this, DDoSCoin introduces a new
-payment opcode, PAY\_TO\_DDOS, that can be used in transactions subject to
-certain constraints. This opcode takes one argument: a string representing a
-domain name that the payer wishes to add to the set of victim servers. The
-transaction has no other parameters, but its value must be greater than the
-coinbase reward a miner would normally receive, and it must carry a
-non-negligble transaction fee. Once this transaction is stored in a valid block,
-the specified domain name is temporarily added to the list of allowed victims.
-The first miner to mine a block with that domain as the victim must specify the
-PAY\_TO\_DDOS transaction as an input to its coinbase transaction (with any
-arbitrary output address), and have no other coinbase transactions. In other
-words, the miner collects the value in the PAY\_TO\_DDOS transaction in lieu of
-the normal block reward.
+In order to allow victims to be (temporarily) selected for DoS, DDoSCoin
+allows ``bounties'' for targetting specific servers. To accomplish this,
+DDoSCoin introduces a new payment opcode, PAY\_TO\_DDOS, that can be used in
+transactions subject to certain constraints. This opcode takes two arguments in
+the output script: a
+string representing a domain name that the payer wishes to have DDoSed, and a
+target difficulty. Once this transaction is stored in a valid block, anyone can
+collect its reward by creating a connection to the specified victim server, with
+a response that meets the given target difficulty. These connections are made
+similar to the way that miners connect to victim servers to create blocks, but
+with a few important differences. First, the \texttt{client\_random} is
+generated using the PAY\_TO\_DDOS transaction ID (txid), the SHA256 hash of the
+output script the payee wants to collect the payment with, and a random nonce.
+The client then makes connections to the specified victim domain until its
+response meets the target difficulty
+(SHA256(\texttt{server\_key\_exchange\_params} || \texttt{signature} ||
+\texttt{nonce}) < target).
 
-The observant reader will notice that nothing stops the payer of the
-PAY\_TO\_DDOS transaction and the miner that it goes to from being the same
-entity. Indeed, a miner could create a PAY\_TO\_DDOS transaction with a victim
-domain that only it has access to, ensuring that it will be able to mine the
-block without competition, and collect its own payment. However, this will not
-net the miner new coins (\TK beyond any transaction fees collected? But we could
-make this block contain no transactions), as the coinbase transaction is
-replaced with its own PAY\_TO\_DDOS input. 
+To collect the bounty reward, the client creates an input script that will
+satisfy the PAY\_TO\_DDOS output. This includes the parameters of the
+connection: the nonce, the \texttt{server\_random} value, the server's
+certificate chain, the server key exchange parameters, and the server key
+exchange signature. To validate the transaction, a miner must recompute the
+\texttt{client\_random} using the transaction ID of the PAY\_TO\_DDOS
+transaction, the hash of the output script in the claiming transaction, and the
+nonce. Then, the miner must verify that the certificate is valid for the
+provided domain (and rooted in a trusted CA), and that the certificate's
+signature over the server key exchange message is valid. Finally, the server
+must check that the server's response meets the target difficulty. If it does,
+then the transaction is valid and can be included in a block.
 
+There are a couple important features of this transaction. First, the reason the
+transaction ID of the PAY\_TO\_DDOS transaction is included (committed to) in
+the \texttt{client\_random} is to prevent a client from ``double-claiming''
+multiple bounty rewards with the same proof-of-DoS. Similarly, the client
+commits to the (hash of the) output script of the claiming transaction to
+prevent others from being able to swap it for their own, therby ``stealing'' the
+proof-of-DoS and collect the reward themselves. These combined allow two
+mutaully-distrusting parties to directly and safely transact currency in
+exchange for a DoS attack.
+
+
+% client_random = H(txid || output_script || nonce)
+
+
+
+%The transaction has no other parameters, but its value must be
+%greater than the coinbase reward a miner would normally receive, and it must
+%carry a non-negligble transaction fee. Once this transaction is stored in a
+%valid block, the specified domain name is temporarily added to the list of
+%allowed victims.  The first miner to mine a block with that domain as the victim
+%must specify the PAY\_TO\_DDOS transaction as an input to its coinbase
+%transaction (with any arbitrary output address), and have no other coinbase
+%transactions. In other words, the miner collects the value in the PAY\_TO\_DDOS
+%transaction in lieu of the normal block reward.
+%
+%The observant reader will notice that nothing stops the payer of the
+%PAY\_TO\_DDOS transaction and the miner that it goes to from being the same
+%entity. Indeed, a miner could create a PAY\_TO\_DDOS transaction with a victim
+%domain that only it has access to, ensuring that it will be able to mine the
+%block without competition, and collect its own payment. However, this will not
+%net the miner new coins (\TK beyond any transaction fees collected? But we could
+%make this block contain no transactions), as the coinbase transaction is
+%replaced with its own PAY\_TO\_DDOS input.
+
+While this new payment type allows a one-time payment for attacking a particular
+target, it cannot be used to update the long-term victim list used by miners to
+decide valid victims for blocks. Otherwise, miners could make a PAY\_TO\_DDOS
+transaction specifying their own local domain in order to always have a
+local-computation puzzle that allowed them to create new blocks in the future.
+Instead, a second method for choosing victims must be employed.
+
+%Instead, PAY\_TO\_DDOS must be a one-time only payment, allowing for the
+%creation of a single block with a payment greater than the coinbase reward. This
+%is similar to proof-of-burn, where new blocks can be created
+%by miners proving that they have destroyed a certain amount of currency. The
+%amount of currency in proof-of-burn cryptocurrencies is adjusted in the same way
+%that difficulty is adjusted for proof-of-work to maintain a constant block rate.
+%
+%\paragraph{Concerns} Because it is possible for a miner to effectively pay a
+%small fee to create a block that only they can solve quickly, PAY\_TO\_DDOS
+%could irronically create a denial of service potential for DDoSCoin. To mitigate
+%the risk of miners using PAY\_TO\_DDOS as a way to keep other miners from
+%producing blocks, the amount above the coinbase reward a PAY\_TO\_DDOS
+%transaction must pay is adjusted dynamically so that blocks that collect these
+%transactions are not able to happen frequently. Additionally, these blocks do
+%not contribute to the 
 
 \subsubsection{Alternate Proof-of-Work}
 
 
-
-
-
+Proof-of-Stake to decide a delta on the victim-list.
 
 -However, the victim could easily generate a new certificate; should instead
 base identity off domain rooted to valid root CAs.
