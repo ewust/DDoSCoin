@@ -12,11 +12,12 @@ proof-of-work puzzle, and alternative ``useful'' proofs have been proposed.
 
 In this paper, we present DDoSCoin, which is a cryptocurrency with a
 \emph{mallicious} proof-of-work. DDoSCoin allows miners to prove that they have
-contributed to a distributed denial of service attack against a specific target.
-This proof involves making a large number of TLS connections to a target server,
-and using infrequent cryptographic responses as a proof.
-
-
+contributed to a distributed denial of service attack against specific target
+servers.  This proof involves making a large number of TLS connections to a
+target server, and using infrequent cryptographic responses to prove that a
+large number of connections has been made. Like proof-of-work puzzles, these
+proofs are inexpensive to verify, and can be made arbitrarily difficult to
+solve.
 
 \end{abstract}
 
@@ -106,6 +107,26 @@ Botnet-as-a-service
 
 \section{Background}
 
+In this section, we review relevant basics of cryptocurrency. For a more
+detail, we refer the reader to other
+sources~\cite{bitcoin-book,bitcoin-paper,bitcoin-sok}.
+
+\subsection{Cryptocurrency}
+
+Bitcoin employs a hash-based proof-of-work protocol to construct a public ledger
+of transactions. In this protocol, miners attempt to solve a simple hash-based
+computational puzzle in order to mine blocks. Mining a block nets the miner a
+reward, and the right to specify what new (valid) transactions should be
+included in the public ledger. To mine a block, a miner must find a hash of a
+block header that is less than an adjustable target. The block header includes
+the hash of the last block found, the merkle root of the list of transactions
+the miner wants to include in this block, and a nonce. The easiest way to solve
+this puzzle is to iterate the nonce\footnote{or modify transactions, therby
+changing the merkle root} until the hash satisfies the target difficulty. Then,
+the miner publishes the found block, and miners use this block as the latest
+block.
+
+
 \subsection{Proof-of-Stake}
 
 Proof-of-Stake is an alternate way of generating new blocks in a cryptocurrency.
@@ -113,9 +134,10 @@ In this system, blocks are ``minted'' (rather than mined) based on how much
 stake the miner has in the currency (rather than their fraction of computational
 power). Proof-of-stake assumes that the underlying cryptocurrency is already
 somewhat distributed, for example through the use of a traditional proof-of-work
-system. In this subsection, we will describe Peercoin, a currently active
+system. In this subsection, we will describe Peercoin, an active
 alternate cryptocurrency that employs a hybrid proof-of-work and proof-of-stake
-algorithm to mint blocks.
+algorithm to mint blocks. For more details on proof-of-stake, we refer the
+reader to the Peercoin~\cite{peercoin} and NXT~\cite{nxt} whitepapers.
 
 Peercoin's proof-of-stake allows currency holders to mint new blocks based on
 how many coin-days they are able and willing to consume. ``Coin-days
@@ -306,24 +328,26 @@ Although not yet implemented, the TLS 1.3 proposal appears to also have ... \TK
 \label{sec:victim}
 
 If DDoSCoin accepted proofs against any TLS 1.2 server, miners would be
-incentivized to set up signed TLS servers locally, and focus exclusively on
-solving those challenges instead of remote ones, leading to the
-proof-of-work being a computational puzzle rather than one based on
-participation in a network denial of service. Thus, DDoSCoin must have a way to
-agree on what victims are acceptable targets for the proofs-of-work to be considered
-valid. Similarly, it is important to focus the denial-of-service effort toward a
-single or small number of victims in order to have the most impact.
+incentivized to set up their own TLS servers locally, and focus exclusively on
+``attacking'' those servers instead of remote ones. Since the miner would have
+access to the private key for that server, they would not be required to even
+create network connections, leading to the proof-of-work being a computational
+puzzle rather than one based on participation in a network denial of service.
+To prevent this, DDoSCoin must have a way to agree on what victims are
+acceptable targets for the proofs-of-work to be considered valid. Similarly, it
+is important to focus the denial-of-service effort toward a single or small
+number of victims in order to have the most impact.
 
-One simple way to is to hardcode a set of victim certificates into the protocol.
-For example, DDoSCoin's published code could contain the identities of
-Facebook's servers, and only incentivize attacks against them. However, there
-are many attackers that might feel uncomfortable attacking Facebook, but would
-be willing to participate in attacks against other websites. In addition, having
-only a single or small set of websites is a risk to DDoSCoin: if those websites
-all go offline or successfully mitigate the attacks (such as by disabling TLS),
-no future DDoSCoin blocks can be mined, and the currency will stall. At this
-point, all DDoSCoins in circulation would become nearly worthless, as there
-would be no way to safely transact them.
+One simple solution is to hardcode a set of victim certificates into the
+protocol.  For example, DDoSCoin's published code could contain the identities
+of Facebook's servers and domains, and only allow and incentivize attacks
+against them. However, there are many attackers that might feel uncomfortable
+attacking Facebook, but would be willing to participate in attacks against other
+websites. In addition, having only a single or small set of victim websites is a
+risk to DDoSCoin: if those websites all go offline or successfully mitigate the
+attacks (such as by disabling TLS), no future DDoSCoin blocks can be mined, and
+the currency will stall. At this point, all DDoSCoins in circulation would
+become nearly worthless, as there would be no way to safely transact them.
 
 These issues lead to a few subtle requirements for choosing valid victims.
 First, there must be \emph{limits} on who is allowed to be a victim, otherwise
@@ -331,7 +355,8 @@ miners can create local computational puzzles. At the same time, there must be
 \emph{enough} targets in order to be robust against stalled blockchains.
 Similarly, the list of victims must be \emph{flexible} in order to allow
 removing targets as they become impractical to attack (either
-through successful attack or mitigation), and adding new ones.
+through successful attack or mitigation), and adding new ones to take their
+place.
 
 To address these issues, we propose two mechanisms the DDoSCoin protocol can
 employ to allow victims to be selected by concensus.
@@ -339,21 +364,22 @@ employ to allow victims to be selected by concensus.
 
 \subsubsection{Pay-to-DDoS}
 
-In order to allow victims to be (temporarily) selected for DoS, DDoSCoin
-allows ``bounties'' for targetting specific servers. To accomplish this,
-DDoSCoin introduces a new payment opcode, PAY\_TO\_DDOS, that can be used in
-transactions subject to certain constraints. This opcode takes two arguments in
-the output script: a
-string representing a domain name that the payer wishes to have DDoSed, and a
-target difficulty. Once this transaction is stored in a valid block, anyone can
-collect its reward by creating a connection to the specified victim server, with
-a response that meets the given target difficulty. These connections are made
-similar to the way that miners connect to victim servers to create blocks, but
-with a few important differences. First, the \texttt{client\_random} is
-generated using the PAY\_TO\_DDOS transaction ID (txid), the SHA256 hash of the
-output script the payee wants to collect the payment with, and a random nonce.
-The client then makes connections to the specified victim domain until its
-response meets the target difficulty
+In order to allow victims to be (temporarily) selected for DoS, DDoSCoin allows
+``bounties'' for targetting specific servers. To accomplish this, DDoSCoin
+introduces a new payment opcode, PAY\_TO\_DDOS, that can be used in transactions
+subject to certain constraints. This opcode takes two arguments in an output
+script: a string representing a domain name that the payer wishes to have
+DDoSed, and a target difficulty corresponding to the amount of connections the
+payer wishes to be made. Once this transaction is stored in a valid block,
+anyone can collect its reward by creating a connection to the specified victim
+server and obtaining a response that meets the given target difficulty. These
+connections are made similar to the way that miners connect to victim servers to
+create blocks, but with a few important differences. First, the
+\texttt{client\_random} is generated using the PAY\_TO\_DDOS transaction ID
+(txid), the SHA256 hash of the output script the payee wants to collect the
+payment with, and a random nonce.  The client then makes connections to the
+specified victim domain until it gets a response that meets the target
+difficulty specified by the PAY\_TO\_DDOS transaction.
 (SHA256(\texttt{server\_key\_exchange\_params} || \texttt{signature} ||
 \texttt{nonce}) < target).
 
@@ -374,12 +400,26 @@ There are a couple important features of this transaction. First, the reason the
 transaction ID of the PAY\_TO\_DDOS transaction is included (committed to) in
 the \texttt{client\_random} is to prevent a client from ``double-claiming''
 multiple bounty rewards with the same proof-of-DoS. Similarly, the client
-commits to the (hash of the) output script of the claiming transaction to
+commits to (a hash of) the output script of the claiming transaction to
 prevent others from being able to swap it for their own, therby ``stealing'' the
-proof-of-DoS and collect the reward themselves. These combined allow two
+proof-of-DoS and collect the reward themselves. These properties combined allow two
 mutaully-distrusting parties to directly and safely transact currency in
-exchange for a DoS attack.
+exchange for a specified-amount of work in a DoS attack.
 
+
+% Maybe move this to discussion....
+Since PAY\_TO\_DDOS transactions can be claimed by anyone, there is a risk to
+the collector that by the time they complete their DoS attack, someone else will
+have collected the payment. In addition, a potential victim website could
+disincentivze attacks by submitting PAY\_TO\_DDOS transactions that they can
+quickly solve locally. This would cause attackers to try to connect to them, and
+eventually even collect a response that meets the target difficulty. However,
+when the attacker went to publish this to collect the reward, the victim could
+publish their proof, essentially double-spending the PAY\_TO\_DDOS transaction.
+With some probability, the victim's transaction will ``win'' and prevent the
+attacker from collecting the reward. Over the long term, attackers may be wary
+of attacking such targets, and instead require higher payouts for attacking them
+to cover such risks.
 
 % client_random = H(txid || output_script || nonce)
 
@@ -433,31 +473,44 @@ In order to allow the victim list to be updated dynamically, DDoSCoin uses
 \emph{Proof-of-Stake} to let currency holders make small changes to the list of
 acceptable victim domains. Using proof-of-stake ensures that updates are only
 done by actors that already have a substantial stake in the currency, either by
-purchasing it, or by previously participating in the (DoS) mining themselves.
+purchasing it or by previously participating in the (DoS) mining themselves.
 
 To update the list, a currency holder ``mints'' a proof-of-stake transaction
-similar to Peercoin. First, they must hold a number of coins unspent for more
-than 30 days, and every second, hashes the aged transaction, a recent
-stake-modifier block, and a current (seconds-resolution) timestamp. If this hash
-is less than the current proof-of-stake target difficulty multiplied by the
-coin-age being consumed by this transaction, then the currency holder is allowed
-to make a new proof-of-stake block. Inside this block, the currency holder can
-make one addition to (or one deletion from) the current victim list.
+similar to Peercoin. First, they must hold a number of coins that have been
+unspent for more than 30 days. After the 30 days have passed, each second the
+minter
+hashes the aged transaction, a recent stake-modifier block, and a current
+(seconds-resolution) timestamp. If this hash is less than the current
+proof-of-stake target difficulty multiplied by the coin-age being consumed in
+this transaction, then the currency holder is allowed to make a new
+proof-of-stake block. Inside this block, the currency holder can make one
+addition to (or one deletion from) the current victim list.
+
+Proof-of-stake blocks contains no coinbase or coinstake reward, and transaction
+fees are not collected. Thus, there is no direct short-term monetary incentive
+to produce such a block. The intention is that this will encourage only those
+with a vested interest in the long-term success of DDoSCoin to participate in
+updating the victim list.
+
+After this block has been published, miners must wait until 10 proof-of-DoS
+(non-proof-of-stake) blocks have been mined before the specified delta to the
+change list is applied. This discourages malicious miners from forking the chain
+at an earlier block with a proof-of-stake block adding their local domain to the
+victim list, and immediately mining blocks on top of it to catch up to the main
+chain.
 
 
 
-Proof-of-Stake to decide a delta on the victim-list.
+%Proof-of-Stake to decide a delta on the victim-list.
 
--However, the victim could easily generate a new certificate; should instead
-base identity off domain rooted to valid root CAs.
-
-
-DDoSCoin must select a small set of victim servers to p
+%-However, the victim could easily generate a new certificate; should instead
+%base identity off domain rooted to valid root CAs.
 
 
--Miners vote (proof-of-stake-esq)
+%DDoSCoin must select a small set of victim servers to p
 
 
+%-Miners vote (proof-of-stake-esq)
 
 
 \section{Discussion}
