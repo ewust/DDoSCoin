@@ -1,4 +1,5 @@
 \input{headers}
+\input{figures}
 
 
 \begin{abstract}
@@ -85,6 +86,7 @@ increase as TLS support becomes more widespread~\cite{letsencrypt}.
 \begin{itemize}
 \item Propose a novel conceptual cryptocurrency, DDoSCoin, whose proof-of-work
 incentives miners to participate in a DDoS attack, and prove they have done so.
+\item Describe a way for target victims to be chosen by consensus.
 \item Implement our proof-of-work function and evaluate its performance.
 \item Discuss and estimate the impact such a cryptocurrency would have if
 deployed, and outline defenses.
@@ -107,11 +109,13 @@ Botnet-as-a-service
 
 \section{Background}
 
-In this section, we review relevant basics of cryptocurrency. For a more
+In this section, we review relevant basics of cryptocurrency. For more
 detail, we refer the reader to other
 sources~\cite{bitcoin-book,bitcoin-paper,bitcoin-sok}.
 
 \subsection{Cryptocurrency}
+
+\FigTx
 
 Bitcoin employs a hash-based proof-of-work protocol to construct a public ledger
 of transactions. In this protocol, miners attempt to solve a simple hash-based
@@ -125,6 +129,13 @@ this puzzle is to iterate the nonce\footnote{or modify transactions, therby
 changing the merkle root} until the hash satisfies the target difficulty. Then,
 the miner publishes the found block, and miners use this block as the latest
 block.
+
+Each block commits to a set of transactions, which each must be valid for the
+block to be considered valid. Transactions in Bitcoin are scripts, and each new
+transactions specifies an \emph{output script} that must be satisfied in order
+to be spent. For example, an output script might specify that it requires a
+spending transaction to provide a valid signature, with the output script
+specifying the public key to validate it with. 
 
 
 \subsection{Proof-of-Stake}

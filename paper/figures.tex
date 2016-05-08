@@ -1,0 +1,13 @@
+
+\newcommand{\FigTx}{
+\begin{figure*}[ht]
+    \centering
+    \includegraphics[width=0.9\textwidth,trim={0 6.5cm 1cm 0},clip]{btc-transaction.pdf}
+    \caption{Standard Bitcoin transaction script. Transaction \#10 spends \#9 by providing a
+            valid input script that when prepended to Transaction \#9's output script,
+            executes to produce a valid output. The output script stores a hash of a
+            public key (verified using the OP\_DUP OP\_HASH160 and OP\_EQUALVERIFY opcodes),
+            and requires a valid signature over the spending transaction (verified via
+            OP\_CHECKSIG).}
+\end{figure*}
+}
