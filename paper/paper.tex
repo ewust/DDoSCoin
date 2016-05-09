@@ -135,7 +135,13 @@ block to be considered valid. Transactions in Bitcoin are scripts, and each new
 transactions specifies an \emph{output script} that must be satisfied in order
 to be spent. For example, an output script might specify that it requires a
 spending transaction to provide a valid signature, with the output script
-specifying the public key to validate it with. 
+specifying the public key to validate it with. To spend such a transaction
+requires creating a new transaction that references the previous one, and
+provides an input (scriptSig) that ``solves'' the previous transactions' output
+(scriptPubKey); in this case, a valid signature over the new transaction. This
+new transaction can then specify a new output (scriptPubKey) for these coins.
+Figure~\ref{fig:bitcoin-tx} shows an example of a standard Bitcoin transaction
+script.
 
 
 \subsection{Proof-of-Stake}
@@ -212,6 +218,8 @@ transaction? Is it signed by the coinstake kernel, or does the coinstake kernel
 include the merkle root of transactions somehow?
 
 \section{DDoSCoin Design}
+
+\FigOverview
 
 Miners in DDoSCoin repeatedly create connections to a TLS victim server, and
 check for a response that satisifes a target difficulty decided by the network.
