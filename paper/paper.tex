@@ -239,9 +239,9 @@ subsidy proportional to the coin-age consumed in their proof-of-stake
 transaction. This serves as the only reward for a minter, as transaction fees are not
 collected by minters in Peercoin.
 
-TODO: how does Peercoin make sure other mint?ers can't steal the coinstake
-transaction? Is it signed by the coinstake kernel, or does the coinstake kernel
-include the merkle root of transactions somehow?
+%TODO: how does Peercoin make sure other mint?ers can't steal the coinstake
+%transaction? Is it signed by the coinstake kernel, or does the coinstake kernel
+%include the merkle root of transactions somehow?
 
 \section{DDoSCoin Design}
 
@@ -419,6 +419,8 @@ employ to allow victims to be selected by concensus.
 
 
 \subsubsection{Pay-to-DDoS}
+
+\label{sec:pay-to-ddos}
 
 In order to allow victims to be (temporarily) selected for DoS, DDoSCoin allows
 ``bounties'' for targetting specific servers. To accomplish this, DDoSCoin
@@ -609,19 +611,19 @@ There are several methods victim websites can use to defend themselves from
 DDoSCoin miners. First, websites can simply disable TLS 1.2 entirely, and only
 support earlier versions such as TLS 1.0~\cite{rfc2246} and TLS
 1.1~\cite{rfc4346}. While older versions of
-TLSv1.0 clients may still be vulnerable to the BEAST attack~\cite{beast}, most
+TLS 1.0 clients may still be vulnerable to the BEAST attack~\cite{beast}, most
 modern clients have mitigations for this attack, and it likely remains the
 safest short-term defense against DDoSCoin. The downside of disabling support
-for TLSv1.2 is losing the ability to negotiate authenticated encryption cipher
+for TLS 1.2 is losing the ability to negotiate authenticated encryption cipher
 modes with clients, which may decrease performance of implementations that have
 hardware acceleration for such modes.
 
 Alternatively, web servers can disable cipher modes that involve signatures from
 the server. This would remove support for forward secure cipher suites, meaning
 that as long as the server's private key is accessible, any previously recorded
-TLS connections can be decrypted. We note that the current drafts of TLSv1.3
+TLS connections can be decrypted. We note that the current drafts of TLS 1.3
 propose to remove non-forward secure cipher suites entirely, possibly making it
-more difficult to defend against DDoSCoin in TLSv1.3.
+more difficult to defend against DDoSCoin in TLS 1.3.
 
 Websites could also attempt to thwart DDoSCoin by participating in the mining
 themselves. Because the victim website will have local access to its private
