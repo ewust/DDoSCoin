@@ -1,4 +1,4 @@
 
 
 miner: miner.c tls.c tls.h
-	$(CC) $^ -o $@ -lssl -lcrypto -levent
+	$(CC) $^ -o $@ -O3 -lssl -lcrypto -levent
