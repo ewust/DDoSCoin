@@ -316,6 +316,7 @@ void new_connection(struct config *conf)
                                    sizeof(conf->sin)) < 0) {
 
         perror("socket connected failed: ");
+        printf("Run `sudo sysctl -w net.ipv4.tcp_tw_recycle=1`\n");
         cleanup(st);
     }
 
