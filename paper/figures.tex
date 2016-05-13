@@ -32,3 +32,16 @@ blocks (4).}
     \label{fig:ddoscoin-overview}
 \end{figure*}
 }
+
+\newcommand{\FigEval}{
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.9\linewidth]{../data/times.pdf}
+    \caption{\textbf{DDoSCoin effect}\,--\, %
+    We set up a quad-core nginx HTTPS server on a local network, and used Apache
+benchmark (ab) to measure page load times under normal conditions (no DDoSCoin
+miner running) and with a single DDoSCoin instance. DDoSCoin increases the
+average page-load time 6-fold from 43ms to over 291ms.}
+    \label{fig:eval}
+\end{figure}
+}

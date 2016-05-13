@@ -571,15 +571,23 @@ chain.
 
 \subsection{Implementation}
 
-To evaluate its performance, we implement our proof-of-DDoS function in 570
-lines of C. Our mining code uses libevent~\cite{libevent} and
-OpenSSL~\cite{openssl}.
+\FigEval
 
-From wifi: 100 concurrent conns, 10k connections total in 53 seconds, 500KB/s
-roughly (no CPU load)
+To evaluate the performance and effectiveness of DDoSCoin, we implement our
+proof-of-DDoS function in 582 lines of C. Our mining code uses
+libevent~\cite{libevent} and OpenSSL~\cite{openssl} to create concurrent
+connections toward a specific target, testing each response to see if it
+satisfies a hard-coded proof-of-DDoS target difficulty.
 
-TODO: measure from CU...or to a local server?
+We tested our proof-of-DDoS function (miner) against a quad-core server under
+our control, running nginx and connected to our attacker over a local Gigibit
+network. When running our miner, the CPU consumption of the server quickly
+reaches 100\% utilization on all 4 cores, while the attacker only requires
+approximately 30\% on a single core. This produces over 3000 TLS connections per
+second, and slowing responses to the server by more than a factor of 6 (see
+Figure~\ref{fig:eval}).
 
+\if0
 \section{Discussion}
 
 -Proof of (burnt) bandwidth
@@ -594,6 +602,8 @@ TODO: measure from CU...or to a local server?
 % ¯\_(ツ)_/¯
 
 \subsection{Defenses}
+\fi
+\section{Defenses}
 
 There are several methods victim websites can use to defend themselves from
 DDoSCoin miners. First, websites can simply disable TLS 1.2 entirely, and only
