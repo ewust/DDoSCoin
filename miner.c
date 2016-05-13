@@ -136,9 +136,8 @@ void handle_cert(struct conn_state *st)
 
 int satisfies_proof_of_work(uint8_t *server_dh_params, size_t server_dh_params_len,
                             uint8_t *sig, size_t sig_len,
-                            uint8_t *nonce, uint8_t *difficulty)
+                            uint8_t *nonce, uint8_t *difficulty, uint8_t *digest)
 {
-    uint8_t digest[SHA256_DIGEST_LENGTH];
     SHA256_CTX ctx;
     SHA256_Init(&ctx);
     SHA256_Update(&ctx, server_dh_params, server_dh_params_len);
@@ -146,7 +145,6 @@ int satisfies_proof_of_work(uint8_t *server_dh_params, size_t server_dh_params_l
     SHA256_Update(&ctx, nonce, 32);
     SHA256_Final(digest, &ctx);
 
-    print_hex("   difficulty: ", digest, SHA256_DIGEST_LENGTH);
     int i;
     for (i=0; i<SHA256_DIGEST_LENGTH; i++) {
         if (digest[i] < difficulty[i]) {
@@ -194,6 +192,7 @@ void handle_keyx(struct conn_state *st)
 {
     struct evbuffer *input = bufferevent_get_input(st->bev);
     size_t keyx_len = get_tls_record(input, &st->keyx_raw);
+    uint8_t digest[SHA256_DIGEST_LENGTH];
 
     if (keyx_len == 0) {
         return;
@@ -208,11 +207,12 @@ void handle_keyx(struct conn_state *st)
 
     // Check if it passes the test
     if (satisfies_proof_of_work(st->skeyx.server_dh_params, st->skeyx.server_dh_params_len,
-                            st->skeyx.sig, st->skeyx.sig_len, st->nonce, st->conf->difficulty)) {
+                            st->skeyx.sig, st->skeyx.sig_len, st->nonce, st->conf->difficulty, digest)) {
 
         struct block new_block;
         make_block_from_state(st, &new_block);
         printf("Winner!\n");
+        print_hex("   difficulty: ", digest, SHA256_DIGEST_LENGTH);
         print_hex("nonce: ", st->nonce, 32);
         print_hex("server_random: ", st->shello.random, 32);
         print_hex("server_dh_params: ", st->skeyx.server_dh_params, st->skeyx.server_dh_params_len);
@@ -226,7 +226,7 @@ void handle_keyx(struct conn_state *st)
 void cleanup(struct conn_state *st)
 {
     struct config *conf = st->conf;
-    printf("cleanup called (%lu)\n", conf->num_connections);
+    //printf("cleanup called (%lu)\n", conf->num_connections);
     if (st->bev) {
         bufferevent_free(st->bev);
     }
@@ -315,7 +315,8 @@ void new_connection(struct config *conf)
     if (bufferevent_socket_connect(bev, (struct sockaddr *)&conf->sin,
                                    sizeof(conf->sin)) < 0) {
 
-        printf("socket connect failed :(\n");
+        perror("socket connected failed: ");
+        cleanup(st);
     }
 
     conf->num_connections++;
@@ -337,7 +338,7 @@ int main()
     memset(&conf, 0, sizeof(conf));
 
     // Lookup IP of target
-    struct hostent *he = gethostbyname("ericw.us");
+    struct hostent *he = gethostbyname("128.138.200.81");
     memset(&conf.sin, 0, sizeof(conf.sin));
     conf.sin.sin_family  = he->h_addrtype;
     conf.sin.sin_port    = htons(443);
@@ -348,11 +349,12 @@ int main()
     memset(conf.merkle_root, 0xBB, 32);
     memset(conf.difficulty, 0x00, 32);
     conf.difficulty[0] = 0x00;
-    conf.difficulty[1] = 0xa7;
+    conf.difficulty[1] = 0x00;
+    conf.difficulty[2] = 0x07;
 
 
     // Load RSA key
-    FILE *fp = fopen("./ericw.us.pub", "rb");
+    FILE *fp = fopen("./pubkey.pem", "rb");
     // Apparently, PEM_read_PUBKEY() doens't read PEM(?!?)
     PEM_read_RSA_PUBKEY(fp, &conf.public_key, NULL, NULL);
     fclose(fp);
@@ -366,7 +368,7 @@ int main()
 
     conf.base = event_base_new();
 
-    fetcher(&conf, 100);
+    fetcher(&conf, 1000);
 
     event_base_dispatch(conf.base);
 
