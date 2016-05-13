@@ -46,6 +46,7 @@ struct config {
     uint8_t     difficulty[32];
 
     size_t      num_connections;
+    size_t      last_connections;
 
     // TODO: remove
     RSA         *public_key;
@@ -333,6 +334,14 @@ void fetcher(struct config *conf, int conns)
     }
 }
 
+void print_status(evutil_socket_t fd, short what, void *arg)
+{
+    struct config *conf = arg;
+
+    printf("%d/sec\n", (conf->num_connections - conf->last_connections));
+    conf->last_connections = conf->num_connections;
+}
+
 int main()
 {
     struct config conf;
@@ -369,8 +378,12 @@ int main()
 
     conf.base = event_base_new();
 
-    fetcher(&conf, 1000);
 
+    struct timeval one_sec = {1,0};
+    struct event *status_ev = event_new(conf.base, -1, EV_PERSIST, print_status, &conf);
+    event_add(status_ev, &one_sec);
+
+    fetcher(&conf, 1000);
     event_base_dispatch(conf.base);
 
     return 0;
