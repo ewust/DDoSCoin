@@ -1,4 +1,5 @@
 
+
 \newcommand{\FigTx}{
 \begin{figure*}[ht]
     \centering
@@ -20,21 +21,21 @@
     \includegraphics[width=0.9\textwidth,trim={0 9.5cm 9.2cm 0},clip]{ddoscoin-overview.pdf}
     \caption{\textbf{DDoSCoin Design}\,--\, %
     DDoSCoin miners make repeated connections to a victim server running TLSv1.2
-(1). In the handshake, the miner commits to the previous block, a transaction
+\numcircledmod{1}. In each handshake, the miner commits to the previous block, a transaction
 merkle root, and a secret nonce. Eventually the victim server will respond with
-a signed message that meets the current proof-of-DDoS target, and the miner can
-create a new block (2) that includes this proof. Victim targets can be selected
-in one of two ways. First, participants can pay into bounties for specific
-victims (3), which can be redeemed by anyone in a special PAY\_TO\_DDOS
-transaction (5) if they can provide a similar proof-of-DDoS. Second, the list of
+a signed message that meets the current proof-of-DDoS target difficulty, and the miner can
+create a new block \numcircledmod{2} that includes this proof. Victim targets can be selected
+in two ways: First, participants can pay into one-time bounties for specific
+victims \numcircledmod{3}, which can be redeemed by anyone in a special PAY\_TO\_DDOS
+transaction \numcircledmod{5} if they can provide a similar proof-of-DDoS against that victim. Second, the list of
 valid victims that blocks can be mined for can be updated by proof-of-stake
-blocks (4).}
+blocks \numcircledmod{4}.}
     \label{fig:ddoscoin-overview}
 \end{figure*}
 }
 
 \newcommand{\FigEval}{
-\begin{figure}[ht]
+\begin{figure}[t]
     \centering
     \includegraphics[width=0.9\linewidth]{../data/times.pdf}
     \caption{\textbf{DDoSCoin effect}\,--\, %

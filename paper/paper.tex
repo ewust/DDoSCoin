@@ -27,32 +27,34 @@ solve.
 
 \section{Introduction}
 
-Cryptocurrencies rely on proofs-of-work (PoW) that
-require miners to spend a large amount of effort to solve a specific puzzle,
-such that once solved, allowing others to inexpensively verify the solution is a
-valid one. In Bitcoin, the proof-of-work is a computational puzzle based on the
-SHA256 hash function, and miners are tasked with finding a partial preimage. The
-only known way to do this is to iterate over a large number of inputs to the
-hash function, and check if the output hash is less than a specified target. In
-simplified terms, to find an input that hashes to N bits of 0s, the miner must
-perform on average $2^{N}$ hashes. However, once found, other miners and Bitcoin
-nodes can verify the puzzle solution with
-a single hash~\footnote{Bitcoin uses double-SHA256 in its design, but this
-detail is not important for the purposes of this paper.}.
+
+Cryptocurrencies rely on proofs-of-work (PoW) that require miners to spend a
+large amount of effort to solve a specific puzzle.  Solutions to these puzzles,
+on the other hand, are designed to be inexpensive to verify. In Bitcoin, the
+proof-of-work is a computational puzzle based on the SHA256 hash function, and
+miners are tasked with finding a partial preimage. The best way to do this is to
+iterate over a large number of inputs to the hash function, and check if the
+output hash satisifes the partial preimage target. In simplified terms, to find
+an input that hashes to N bits of 0s, the miner must perform on average $2^{N}$
+hashes. Once such an input is found, other miners and Bitcoin nodes can verify the
+puzzle solution with a single hash~\footnote{Bitcoin uses double-SHA256 in its
+design, but this detail is not important for the purposes of this paper.}.
 
 
 Although the proof-of-work used in Bitcoin gives it resistance to sybil attacks,
 the amount of computational effort carried out collectively by its miners does
-not contribute to any problems besides securing the currency from attack.
+not contribute to any useful problems besides securing the currency from attack.
 Indeed, this computational effort is substantial: As of 2016, miners
 collectively perform roughly $10^{18}$ (or about $2^{60}$) hashes every
 second~\cite{blockchain-hashrate}.
 
-Previously, researchers have proposed alternative cryptocurrencies (altcoins)
-that aim to have more beneficial proofs-of-work~\cite{primecoin,permacoin} that
-provide utility beyond securing the underlying currency. In this paper however,
-we investigate going in the opposite direction, and propose an altcoin that has
-a \emph{malicious} proof-of-work that is externally detrimental.
+Many see this distributed computation as a collosal waste of CPU resources, and researchers have proposed
+alternative cryptocurrencies (altcoins) that aim to have more beneficial
+proofs-of-work~\cite{primecoin,permacoin} that provide utility beyond securing
+the underlying currency, such as finding chains of large primes or
+proving the archive of data. In this paper however, we investigate going in the
+opposite direction, and propose an altcoin that has a \emph{malicious}
+proof-of-work that is externally detrimental.
 
 In particular, we propose a proof-of-work that allows miners to prove they have
 participated in a distributed denial of service (DDoS) attack against a
@@ -65,7 +67,7 @@ owners and other attacks to directly collect revenue for their assistance
 in a decentralized DDoS attack.
 
 
-The malicious proof-of-work operates by having miners create a large number of
+The malicious ``proof-of-DDoS'' operates by having miners create a large number of
 TLS connections to a target webserver, and using the server's signed responses
 as a proof of connection. In modern versions of TLS, the server signs a
 client-provided parameter of the connection, along with server-provided values
@@ -77,35 +79,43 @@ report connections that match some rare threshold, such as the signature from
 the server starts with $N$ bits of 0s. On average, it will take clients $2^{N}$
 connections to produce such a proof.
 
-Although the malicious proof-of-work only works against websites that support
+Although the malicious proof-of-DDoS only works against websites that support
 TLS 1.2, as of April 2016, over 56\% of the Alexa top million websites support
-this version of TLS according to censys.io~\cite{censys}. Furthermore, we
+this version of TLS~\cite{censys}. Furthermore, we
 expect this number to increase as TLS support becomes more
 widespread~\cite{letsencrypt}.
+
+Using our proof-of-DDoS, we conceptualize a cryptocurrency that uses it, which
+we call \emph{DDoSCoin}. In addition to using proof-of-DDoS, DDoSCoin allows
+miners to select the victim servers by concensus using a proof-of-stake
+protocol. Rather than specify a single website or static list that DDoSCoin
+miners target, choosing them by concensus allows the choice of who is attacked
+to be made collectively and fairly by DDoSCoin participants.
 
 \emph{Contributions}
 \begin{itemize}
 \item Propose a novel conceptual cryptocurrency, DDoSCoin, whose proof-of-work
-incentives miners to participate in a DDoS attack, and prove they have done so.
-\item Describe a way for target victims to be chosen by consensus.
-\item Implement our proof-of-work function and evaluate its performance.
-\item Discuss and estimate the impact such a cryptocurrency would have if
-deployed, and outline defenses.
+incentives miners to participate in a DDoS attack, and allows them prove they have done so.
+\item Describe a way for target victims to be chosen by consensus of its
+participants.
+\item Implement our proof-of-work function and evaluate its performance and
+impact.
+\item Discuss several defenses against such a cryptocurrency that potential
+victims can employ.
 \end{itemize}
-%TODO: remove this last one?
 
 %Section blah does blah, and Section blat describes blat.
 
 \section{Related Work}
 
-Many alternate cryptocurrency protocols (alt-coins) have been proposed since the
+Many alternate cryptocurrency protocols (altcoins) have been proposed since the
 creation of Bitcoin. Although none have yet eclipsed the popularity of Bitcoin,
-many alt-coins have interesting innovations, often in the form of alternate
+many altcoins have interesting innovations, often in the form of alternate
 proof-of-work. For example, Litecoin uses scrypt in place of SHA256 in its
 proof-of-work, with the intention of being ``ASIC-resistant'' in order to allow
 anyone to mine competatively with only a CPU~\cite{litecoin}.
 
-Permacoin is a proposed alt-coin that uses a novel
+Permacoin is a proposed altcoin that uses a novel
 \emph{proof-of-storage}~\cite{permacoin}.  Rather than waste computational
 resources solving a useless proof-of-work puzzle (as in Bitcoin), miners are
 instead incentivzed to store parts of a large agreed-upon file. In order to be
@@ -116,7 +126,14 @@ In Primecoin, miners search for special chains of prime
 numbers~\cite{primecoin}. Although Primecoin has found several large Cunningham
 and bi-twin chains, it remains unclear if such primes have any practical use.
 
-TorPath~\cite{torpath} ... \TK
+TorPath proposes a proof-of-bandwidth altcoin that incentivizes users to
+participate in the Tor Network~\cite{torpath}. However, it relies on a set of
+semi-trusted centralized servers to assign Tor circuits to clients. It is also
+succeptible to collusion and sybil attacks by participants, however many of
+these attacks are outside the threat model of TorPath as it requires performing
+those attacks against the underlying Tor network. In contrast, DDoSCoin does not
+require any centralized parties for the proof-of-DDoS, besides trusting existing
+certificate authorities to validate domains.
 
 Although Bitcoin uses a scripting language for transactions (see
 Section~\ref{sec:scripting}), the allowed operations are very
@@ -159,6 +176,7 @@ block.
 Each block commits to a set of transactions, which each must be valid for the
 block to be considered valid. Transactions in Bitcoin are scripts, and each new
 transactions specifies an \emph{output script} that must be satisfied in order
+for the coins
 to be spent. For example, an output script might specify that it requires a
 spending transaction to provide a valid signature, with the output script
 specifying the public key to validate it with. To spend such a transaction
@@ -176,28 +194,30 @@ Proof-of-Stake is an alternate way of generating new blocks in a cryptocurrency.
 In this system, blocks are ``minted'' (rather than mined) based on how much
 stake the miner has in the currency (rather than their fraction of computational
 power). Proof-of-stake assumes that the underlying cryptocurrency is already
-somewhat distributed, for example through the use of a traditional proof-of-work
-system. In this subsection, we will describe Peercoin, an active
-alternate cryptocurrency that employs a hybrid proof-of-work and proof-of-stake
-algorithm to mint blocks. For more details on proof-of-stake, we refer the
-reader to the Peercoin~\cite{peercoin} and NXT~\cite{nxt} whitepapers.
+somewhat distributed, for example through prior use of a traditional
+proof-of-work system. There are several variants on proof-of-stake; in this
+subsection, we will describe Peercoin, an active alternate cryptocurrency that
+employs a hybrid proof-of-work and proof-of-stake algorithm to mint blocks. For
+more details on proof-of-stake, we refer the reader to the
+Peercoin~\cite{peercoin} and NXT~\cite{nxt} whitepapers.
 
 Peercoin's proof-of-stake allows currency holders to mint new blocks based on
-how many coin-days they are able and willing to consume. ``Coin-days
-consumed'' is a measure of the product of the amount of coins spent, and the
-number of days the have not been previously spent. For example, to consume 10
+how many coin-days they are able and willing to consume. ``Coin-days consumed''
+is a measure of the product of the amount of coins spent in a transaction, and
+the number of days since they were last spent. For example, to consume 10
 coin-days, a currency holder can spend 10 Peercoin that they have held for a
 day, or equivalently, spend 5 Peercoins that were last spent 2 days ago. Note
 that the holder can send these coins to anyone (including themselves) in order
 to consume the coin age.
 
 To mint a new block, a minter creates a special transaction (presumably one
-where the minter pays themself) where one of the
-inputs has been unspent for at least 30 days. The resulting transaction, along
-with a timestamp, must meet a certain hash target that gets easier proportional to how many
-coin-days are consumed. For example, if the current difficulty gives a minter
-consuming 100 coin-days a 1\% chance of minting a block per second, a minter
-that was able to consume 200 coin-days would have a 2\% chance per second.
+where the minter pays themself) where one of the inputs has been unspent for at
+least 30 days. The resulting transaction, along with a timestamp, must meet a
+certain hash target that gets easier proportional to how many coin-days are
+consumed by the transaction. For example, if the current difficulty gives a
+minter consuming 100 coin-days a 1\% chance of minting a block per second, a
+minter that was able to consume 200 coin-days would have a 2\% chance per
+second.
 
 The input to the hash includes information about the ``aged'' transaction, as
 well as a current timestamp\footnote{In recent versions of Peercoin, the hash
@@ -255,10 +275,14 @@ can be published by the miner to create a new valid block.
 To begin, a miner generates a random 32-byte secret nonce, $N$. The miner also
 selects the latest block in the chain it is mining on, and the set of
 transactions that the miner intends to include in this block, both as is done in
-Bitcoin. The miner then takes the SHA256 hash of the previous block header, the
-Merkle root of transactions (as generated in Bitcoin), and the secret nonce $N$,
-and hashes their concatenation using SHA256 to generate the
-32-byte \texttt{client\_random} the miner will use.
+Bitcoin. The miner then computes:
+\begin{equation}
+SHA256(prev\_block || merkle\_root || N)
+\end{equation}
+
+to generate the 32-byte \texttt{client\_random}, where $prev\_block$ is
+the SHA256 hash of the previous block header, $merkle\_root$ is the
+Merkle root of transactions (as computed in Bitcoin), and $N$ is the random nonce.
 
 The miner initiates a TLS version 1.2~\cite{rfc5246} connection with the victim
 server, using the \texttt{client\_random}, and choosing a set of cipher suites
@@ -284,21 +308,24 @@ these for verification in case a block is found.
 
 In the server key exchange message, the server sends key exchange parameters
 (such as the Diffie-Hellman parameters and the ephemeral public value generated
-by the server, or the curve parameters and a public curve point in ECDHE). These
-key exchange parameters, along with the \texttt{client\_random} and
-\texttt{server\_random},  are signed by the server using its private key; this
-signature can be verified by using the public key in the certificate.
+by the server, or the curve parameters and a public curve point in ECDHE). The
+server signs these key exchange parameters, along with the
+\texttt{client\_random} and \texttt{server\_random}. This signature can be
+verified with the public key in the certificate.
 
 Because the server key exchange signature contains the \texttt{client\_random}
 and \texttt{server\_random}, the signature value will be unpredictable to the
-client ahead of time. In other words, each signature will be a random value that
-depends on miner-provided value. Thus, it can be used as a proof-of-work in the
+client ahead of time. In addition, each signature will be a random value that
+depends on the miner-provided nonce. Thus, it can be used as a proof-of-work in the
 following way:
 
 If the SHA256 hash of the server key exchange parameters, signature, and
 miner-chosen nonce $N$ is less than the current target difficulty, then this
 connection satisfies the proof-of-work threshold, and can be used to form the
-next block.
+next block. We hash $N$ a second time in this way to prevent the victim server
+from being able to tell if their response would satisfy the target difficulty.
+Otherwise, servers could simply withhold such responses, and no blocks could be
+published for them.
 
 To make a block, the miner publishes the prevoius block's hash, the transactions
 (and their Merkle root), the nonce $N$, the \texttt{server\_random} value, the
@@ -330,15 +357,15 @@ this chain.
 
 \subsection{Earlier TLS Versions}
 
-DDoSCoin is incompatible with earlier TLS (or even SSL) versions because the
-server key exchange signature does not include the \texttt{client\_random}, or
-any client-provided values. In earlier versions, the only value that provably comes from the server (i.e.
-is signed by a key tied to the victim's identity) does not contain any
-comittments from the client about the previous block, or what transactions
-should be included in the block. If we were to accept blocks where there was
-only a server signature that met some target difficulty, any miner could steal
-another miner's found block (and the contained block reward) by changing the
-transactions and forwarding the block.
+DDoSCoin is incompatible with versions of TLS before 1.2 (including SSL) because
+the server key exchange signature does not include the \texttt{client\_random}
+(or any client-provided values). In earlier versions, the only value that
+provably comes from the server (i.e.  is signed by a key tied to the victim's
+identity) does not contain any comittments from the client about the previous
+block, or what transactions should be included in the block. If we were to
+accept blocks where there was only a server signature that met some target
+difficulty, any miner could steal another miner's found block (and the contained
+block reward) by changing the transactions and forwarding the block.
 
 If we were to somehow tie the previous block's hash and Merkle root into this
 proof, for example, by saying that the hash of the signature and a
@@ -354,7 +381,7 @@ secret is less than than the threshold difficulty, resulting in a computational
 puzzle. Even values sent by the server---such as the Finished message that
 contains a MAC dependent on the shared secret---can be (re)computed by the client.
 
-This interesting property gives rise to an observation that with respect to
+As an aside, this interesting property gives rise to an observation that with respect to
 clients, the contents of TLS connections are \emph{deniable}. That is, it is not
 possible for a client to record a TLS connection (including its chosen secrets)
 and report this to a third party in a way that cryptographically proves what the
@@ -370,11 +397,11 @@ to encode the necessary commitments (previous block, merkle root, and nonce)
 used in DDoSCoin.  However, SSH server identities are generally not signed by a
 trusted party, making verification that a miner has communicated with a
 particular server more complicated.  Nonetheless, identities in an SSH-based
-DDoSCoin could be based off of the server's host key, rather than a domain in a
+DDoSCoin could simply be the server's host key rather than a domain in a
 CA-signed certificate.
 
 Although not yet implemented, the current TLS 1.3 proposal appears to also have the
-property of the server signing messages sent by the client. In particular, the
+necessary properties that enable DDoSCoin. In particular, the
 Certificate Verify message includes a signature from the server over essentially
 all prior handshake messages, including the Client Hello that contains the
 \texttt{client\_random}. Thus, DDoSCoin could be used against TLS 1.3
@@ -388,21 +415,23 @@ incentivized to set up their own TLS servers locally, and focus exclusively on
 ``attacking'' those servers instead of remote ones. Since the miner would have
 access to the private key for that server, they would not be required to even
 create network connections, leading to the proof-of-work being a computational
-puzzle rather than one based on participation in a network denial of service.
-To prevent this, DDoSCoin must have a way to agree on what victims are
-acceptable targets for the proofs-of-work to be considered valid. Similarly, it
+puzzle rather than one based on participation in a denial of service over a
+network.
+To prevent this, DDoSCoin must have a way to agree on which victims are
+acceptable targets for the proofs-of-DDoS to be considered valid. Similarly, it
 is important to focus the denial-of-service effort toward a single or small
 number of victims in order to have the most impact.
 
-One simple solution is to hardcode a set of victim certificates into the
+One simple solution is to hardcode a set of victim identities into the
 protocol.  For example, DDoSCoin's published code could contain the identities
-of Facebook's servers and domains, and only allow and incentivize attacks
+(domain names)
+of Facebook's servers, and only allow and incentivize attacks
 against them. However, there are many attackers that might feel uncomfortable
-attacking Facebook, but would be willing to participate in attacks against other
+attacking Facebook, but are willing to participate in attacks against other
 websites. In addition, having only a single or small set of victim websites is a
 risk to DDoSCoin: if those websites all go offline or successfully mitigate the
-attacks (such as by disabling TLS), no future DDoSCoin blocks can be mined, and
-the currency will stall. At this point, all DDoSCoins in circulation would
+attacks, no future DDoSCoin blocks can be mined, and
+the currency will stall. If this happened, all DDoSCoins in circulation would
 become nearly worthless, as there would be no way to safely transact them.
 
 These issues lead to a few subtle requirements for choosing valid victims.
@@ -414,8 +443,11 @@ removing targets as they become impractical to attack (either
 through successful attack or mitigation), and adding new ones to take their
 place.
 
-To address these issues, we propose two mechanisms the DDoSCoin protocol can
-employ to allow victims to be selected by concensus.
+To address these issues, we propose two mechanisms that DDoSCoin can
+employ to allow victims to be selected by concensus. The first mechanism allows
+anyone to commit money to whoever can prove they sent an amount of traffic to a target
+(PAY\_TO\_DDOS). The second allows for updating the list of victim domains that
+miners are allowed to attack when mining for blocks.
 
 
 \subsubsection{Pay-to-DDoS}
@@ -433,34 +465,38 @@ anyone can collect its reward by creating a connection to the specified victim
 server and obtaining a response that meets the given target difficulty. These
 connections are made similar to the way that miners connect to victim servers to
 create blocks, but with a few important differences. First, the
-\texttt{client\_random} is generated using the PAY\_TO\_DDOS transaction ID
-(txid), the SHA256 hash of the output script the payee wants to collect the
-payment with, and a random nonce.  The client then makes connections to the
+\texttt{client\_random} is generated as follows:
+\begin{equation}
+SHA256(txid || output\_script || N)
+\end{equation}
+
+where $txid$ is the transaction ID of the PAY\_TO\_DDOS transaction,
+$output\_script$ is the SHA256 hash of the output script the payee wants to collect the
+payment with, and $N$ is a 32-byte random nonce.  The client then makes connections to the
 specified victim domain until it gets a response that meets the target
 difficulty specified by the PAY\_TO\_DDOS transaction.
-(SHA256(\texttt{server\_key\_exchange\_params} || \texttt{signature} ||
-\texttt{nonce}) < target).
+($SHA256(server\_key\_exchange\_params || signature || N) < target$).
 
 To collect the bounty reward, the client creates an input script that will
 satisfy the PAY\_TO\_DDOS output. This includes the parameters of the
 connection: the nonce, the \texttt{server\_random} value, the server's
 certificate chain, the server key exchange parameters, and the server key
 exchange signature. To validate the transaction, a miner must recompute the
-\texttt{client\_random} using the transaction ID of the PAY\_TO\_DDOS
-transaction, the hash of the output script in the claiming transaction, and the
-nonce. Then, the miner must verify that the certificate is valid for the
-provided domain (and rooted in a trusted CA), and that the certificate's
-signature over the server key exchange message is valid. Finally, the server
-must check that the server's response meets the target difficulty. If it does,
-then the transaction is valid and can be included in a block.
+\texttt{client\_random} as above. Then, the miner must verify that the
+certificate is valid for the provided domain (and rooted in a trusted CA), and
+that the certificate's signature over the server key exchange message is valid.
+Finally, the server must check that the server's response meets the target
+difficulty specified by the PAY\_TO\_DDOS transaction. If it does, then the
+transaction is valid and can be included in a block, letting the client collect
+the reward.
 
 There are a couple important features of this transaction. First, the reason the
 transaction ID of the PAY\_TO\_DDOS transaction is included (committed to) in
 the \texttt{client\_random} is to prevent a client from ``double-claiming''
 multiple bounty rewards with the same proof-of-DoS. Similarly, the client
-commits to (a hash of) the output script of the claiming transaction to
+commits to the output script of the claiming transaction to
 prevent others from being able to swap it for their own, therby ``stealing'' the
-proof-of-DoS and collect the reward themselves. These properties combined allow two
+proof-of-DoS and collecting the reward themselves. These properties combined allow two
 mutaully-distrusting parties to directly and safely transact currency in
 exchange for a specified-amount of work in a DoS attack.
 
@@ -551,11 +587,11 @@ with a vested interest in the long-term success of DDoSCoin to participate in
 updating the victim list.
 
 After this block has been published, miners must wait until 10 proof-of-DoS
-(non-proof-of-stake) blocks have been mined before the specified delta to the
-change list is applied. This discourages malicious miners from forking the chain
-at an earlier block with a proof-of-stake block adding their local domain to the
-victim list, and immediately mining blocks on top of it to catch up to the main
-chain.
+(non-proof-of-stake) blocks have been mined with the old list of valid domains
+before the specified delta to the change list is applied. This discourages
+malicious miners from forking the chain at an earlier block with a
+proof-of-stake block adding their local domain to the victim list, and
+immediately mining blocks on top of it to catch up to the main chain.
 
 
 
@@ -582,12 +618,16 @@ connections toward a specific target, testing each response to see if it
 satisfies a hard-coded proof-of-DDoS target difficulty.
 
 We tested our proof-of-DDoS function (miner) against a quad-core server under
-our control, running nginx and connected to our attacker over a local Gigibit
-network. When running our miner, the CPU consumption of the server quickly
-reaches 100\% utilization on all 4 cores, while the attacker only requires
-approximately 30\% on a single core. This produces over 3000 TLS connections per
-second, and slowing responses to the server by more than a factor of 6 (see
-Figure~\ref{fig:eval}).
+our control, running nginx serving the default page and connected to our
+attacker over a local Gigibit Ethernet network. When running our miner, the CPU
+consumption of the server quickly reaches 100\% utilization on all 4 cores,
+while the attacker only requires approximately 30\% on a single core. This
+produces over 3000 TLS connections per second, and slows response times of the
+webserver considerably. We used Apache benchmark (ab) with 1000 connections with
+a concurrency of 50 to quantify this, and tested the server under normal
+conditions (no miner running) and under DoS (miner running). As shown in
+Figure~\ref{fig:eval}, we find that the average response time increases by more
+than a factor of 6.
 
 \if0
 \section{Discussion}
@@ -607,7 +647,7 @@ Figure~\ref{fig:eval}).
 \fi
 \section{Defenses}
 
-There are several methods victim websites can use to defend themselves from
+Victim websites can use several methods to defend themselves from
 DDoSCoin miners. First, websites can simply disable TLS 1.2 entirely, and only
 support earlier versions such as TLS 1.0~\cite{rfc2246} and TLS
 1.1~\cite{rfc4346}. While older versions of
@@ -618,10 +658,10 @@ for TLS 1.2 is losing the ability to negotiate authenticated encryption cipher
 modes with clients, which may decrease performance of implementations that have
 hardware acceleration for such modes.
 
-Alternatively, web servers can disable cipher modes that involve signatures from
+Alternatively, web servers can disable cipher modes that require signatures from
 the server. This would remove support for forward secure cipher suites, meaning
 that as long as the server's private key is accessible, any previously recorded
-TLS connections can be decrypted. We note that the current drafts of TLS 1.3
+TLS connections could be decrypted. We note that the current drafts of TLS 1.3
 propose to remove non-forward secure cipher suites entirely, possibly making it
 more difficult to defend against DDoSCoin in TLS 1.3.
 
@@ -631,9 +671,9 @@ key, they will have an advantage over remote clients. With this advantage, the
 victim might be able to mine enough DDoSCoins to mint a proof-of-stake block
 that removes itself from the list.
 
-Finally, websites could attempt to go after mining operations legally:
-Publishing a proof-of-DDoS block in the DDoSCoin blockchain may reveal intent to
-bring down a service for financial profit. If the victim webserver is able to
+Finally, websites could attempt to go after mining operations legally.
+Publishing a proof-of-DDoS block in the DDoSCoin blockchain may reveal the
+intent of a miner to attack a service for financial profit. If the victim webserver is able to
 log the traffic they receive, they can discover the IP address of the party
 given a published proof-of-DDoS block. However, as many attackers may use proxies,
 botnets, or bullet-proof hosting to carry out their attacks, finding an
@@ -642,15 +682,16 @@ attacker's IP address may not be sufficient for legal action.
 
 \section{Conclusion}
 
-In this paper, we have presented a proof-of-DDoS, whereby cryptocurrency miners
-can prove their involvement in sending a large amount of requests to a specified
-victim webserver. Proof-of-DDoS can be used to replace proof-of-work in a
-cryptocurrency setting, provided that there is consensus around what victims are
-valid targets. Our conceptual alt-coin, DDoSCoin, provides such a concensus
-through two mechanisms: PAY\_TO\_DDOS, whereby a bounty can be set for DDoSing a
-given victim domain, and proof-of-stake updates to the list of valid victims.
+In this paper, we have presented a proof-of-DDoS cryptocurrency that allows
+miners to prove their involvement in sending a large amount of requests to a
+specified victim webserver. Proof-of-DDoS can be used to replace proof-of-work
+in a cryptocurrency setting, provided that there is consensus around what
+victims are valid targets. Our conceptual altcoin, DDoSCoin, provides such a
+concensus through two mechanisms: PAY\_TO\_DDOS, whereby a bounty can be set for
+DDoSing a given victim domain, and proof-of-stake updates to the list of valid
+victims.
 
-Cryptocurrency inovation continues to produce new and useful proof-of-work
+Cryptocurrency innovation continues to produce new and useful proof-of-work
 replacements. Still, proving access to arbitrary resources remains a difficult
 challenge. In this direction, DDoSCoin delivers a novel technique for proving
 the use of bandwidth to a (potentially unwilling) target domain. We hope that
