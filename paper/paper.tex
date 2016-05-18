@@ -594,6 +594,37 @@ proof-of-stake block adding their local domain to the victim list, and
 immediately mining blocks on top of it to catch up to the main chain.
 
 
+\subsubsection{Difficulty Adjustment}
+
+The difficulty of proof-of-work changes dynamically in DDoSCoin, as it does in
+other crypto-currencies, in order to limit the rate at which new blocks are mined.
+However, in DDoSCoin, the difficulty is adjusted separately for each target domain. 
+The difficulty is not global, since domains could have different maximum throughputs, 
+allowing more or fewer connections from all miners over the same time period. Consider
+a single domain that handles many connections per second added to the target list. 
+The miners would connect to that server more often, since it will give more chances 
+at mining a block, and thus relieve traffic from the other targets.
+
+DDoSCoin adjusts diffuculty for a given domain as a function of the total number 
+of blocks mined, rather than the number of blocks mined by targetting that domain. 
+This allows target domains that somehow become more difficult to reach to quickly 
+return to a more appropriate difficulty, without having many blocks mined at the 
+high difficulty. This comes at a sacrifice to the agility of corrections when a 
+domain has too low of a difficulty. This allows a run on an easily mined domain 
+to occur for longer.
+
+We correct for this lower reactivity by dividing the number of blocks required 
+for a difficulty adjustment by the number of domains being targeted. Thus, as 
+more domains are in the target list and it becomes more likely that one may
+be able to handle many requests, the total number of mined blocks that will result
+in difficulty adjustment shrinks. 
+
+A target's initial difficulty in DDoSCoin is decided by the stakeholder that
+introduces the target in a proof-of-stake block. The stakeholder is incentivized to not
+set the difficulty too low, as the DDoS would be innefective. Also, many coins would be
+mined quickly, devaluing the stakeholder's own coins. If the difficulty is set too high,
+there will be a delay as other domains are mined, and the difficulty adjusts down
+to the appropriate level.
 
 %Proof-of-Stake to decide a delta on the victim-list.
 
