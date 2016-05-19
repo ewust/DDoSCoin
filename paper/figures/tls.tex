@@ -1,0 +1,47 @@
+\documentclass{article}
+\usepackage{msc}
+\usepackage{amsmath}
+\setlength{\instdist}{5\instdist}
+\setlength{\instwidth}{1.75\instwidth}
+%\setlength{\levelheight}{1.5\levelheight}
+\setlength{\topheaddist}{0pt}
+\setlength{\envinstdist}{0pt}
+\drawframe{no}
+\renewcommand\msckeyword{} 
+\renewcommand\hmsckeyword{}
+\renewcommand\mscdockeyword{}
+\begin{document}
+
+\begin{msc}{}
+
+\declinst{miner}{}{Miner}
+\declinst{target}{}{Target}
+
+\nextlevel
+\mess{\parbox{\instdist}{\centering
+\vspace{-12pt}
+\texttt{ciphers = DHE}\\
+\texttt{client\_random = $\operatorname{SHA256}(prev\_block || merkle\_root || N)$}}
+}{miner}{target}
+\nextlevel
+\nextlevel
+\mess{\parbox{\instdist}{\centering
+\vspace{-12pt}
+\texttt{cipher = DHE}\\
+\texttt{server\_random = 0x\ldots}}
+}{target}{miner}
+\nextlevel
+\mess{\texttt{certificate chain}}{target}{miner}
+\nextlevel
+\nextlevel
+\mess{\parbox{\instdist}{\centering
+\vspace{-12pt}
+\texttt{DH Parameters}\\
+\texttt{signed(client\_random, server\_random, DH Parameters)}}
+}{target}{miner}
+
+
+
+
+\end{msc}
+\end{document}
