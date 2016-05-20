@@ -714,7 +714,7 @@ for the site. Having this priveleged position allows
 the target to actively engage in DDoSCoin as a defense. We discuss this further in
 Section~\ref{sec:defense}.
 
-An interesting choice in the design of DDoSCoin is that the target-setting is done 
+An interesting choice in the design of DDoSCoin is target-setting is done 
 dynamically, and by consensus. A given target can go offline, or in some other way
 defend against DDoSCoin at any point. When this happens, the currency cannot stall,
 as then no coins could be transacted. This necessitates dynamic target-setting, 
@@ -729,7 +729,9 @@ use their choice of previous block to veto a given proof-of-stake block. This wo
 be a fork of the blockchain. If a clear majority treat a block as malformed because
 it introduces an undesired domain, then the longer chain wins, and the undesired
 domain is not included in the target set, and any blocks mined on the chain with
-the vetoed target are not part of the blockchain.
+the vetoed target are not part of the blockchain. This allows the miners to coordinate
+and self-enforce a blacklist, or whitelist, of target domains, so long as they 
+have sufficient participation in the policy.
 
 %Jumping the gun on PAY\_TO\_DDOS transactions before they find their way into the block chain
 %could be weird. Especially if people start only inserting them as they solve the puzzle.
