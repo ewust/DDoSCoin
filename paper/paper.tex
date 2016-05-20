@@ -402,13 +402,6 @@ particular server more complicated.  Nonetheless, identities in an SSH-based
 DDoSCoin could simply be the server's host key rather than a domain in a
 CA-signed certificate.
 
-Although not yet implemented, the current TLS 1.3 proposal appears to also have the
-necessary properties that enable DDoSCoin~\cite{tls-draft}. In particular, the
-Certificate Verify message includes a signature from the server over essentially
-all prior handshake messages, including the Client Hello that contains the
-\texttt{client\_random}. Thus, DDoSCoin could be used against TLS 1.3
-servers with only minor modifications.
-
 \subsection{Victim Selection}
 \label{sec:victim}
 
@@ -735,7 +728,15 @@ have sufficient participation in the policy.
 
 %Jumping the gun on PAY\_TO\_DDOS transactions before they find their way into the block chain
 %could be weird. Especially if people start only inserting them as they solve the puzzle.
-\todo{Talk about TLS 1.3, signing client controlled values}
+
+Although not yet implemented, the current TLS 1.3 proposal appears to also have the
+necessary properties that enable DDoSCoin~\cite{tls-draft}. In particular, the
+Certificate Verify message includes a signature from the server over essentially
+all prior handshake messages, including the Client Hello that contains the
+\texttt{client\_random}. Thus, DDoSCoin could be used against TLS 1.3
+servers with only minor modifications. This should be considered in the design of 
+TLS 1.3 due to the long life of TLS implementations.
+
 
 
 \subsection{Ethical Considerations}
