@@ -479,6 +479,11 @@ specified victim domain until it gets a response that meets the target
 difficulty specified by the PAY\_TO\_DDOS transaction, i.e. the hash of the key exchange 
 parameters, signature, and nonce are less than the target hash value.
 
+The bounty poster must select a difficulty that is appropriate for the target
+and reward. If the difficulty is too high, no miner will attack the target,
+because the miners do not want to waste effort. Also, if the difficulty is
+too low, the reward will be claimed for little degradation of service.
+
 To collect the bounty reward, the client creates an input script that will
 satisfy the PAY\_TO\_DDOS output. This includes the parameters of the
 connection: the nonce, the \texttt{server\_random} value, the server's
@@ -647,7 +652,8 @@ introduces the target in a proof-of-stake block. The stakeholder is incentivized
 set the difficulty too low, as the DDoS would be innefective. Also, many coins would be
 mined quickly, devaluing the stakeholder's own coins. If the difficulty is set too high,
 there will be a delay as other domains are mined, and the difficulty adjusts down
-to the appropriate level. 
+to the appropriate level. These are similar to the incentives for PAY\_TO\_DDOS 
+transactions, mentioned in Section~\ref{sec:pay-to-ddos}.
 
 %Proof-of-Stake to decide a delta on the victim-list.
 
