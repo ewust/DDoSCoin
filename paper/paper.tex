@@ -695,20 +695,22 @@ than a factor of 6.
 %-Defenses
 %-Target server's participation
 
+Many positive results have come from cryptocurrencies.
 Bitcoin was invented with the goal of creating a decentralized digital currency, 
 and to that end has been more sucessful than most imagined. Banks are turning
 to ``Blockchain technology'' to solve issues regarding public ledgers.
 Primecoin and TorPath use cryptocurrencies to incentivize positive actions.
 However, this positivity is not inherent to cryptocurrencies. DDoSCoin demonstrates
-malicousness inherent to the currency's design.
+malicousness inherent to a currency's design, turning the notion of what constitutes
+a ``useful'' proof-of-work on its head. Certainly a DDoS attack it useful to someone,
+but negatively impacts society as a whole.
 
 DDoSCoin uses proof that the miner connected to a given server a sufficient number 
 of times as its proof-of-work. This is an indirect measurement of how much bandwidth
 to a given endpoint is being wasted by the miner. This provides a unique challenge
-when miners have different bandwidth to a given endpoint at a level beyond their direct 
-control. In prior cryptocurrencies, the proof-of-work uses resources entirely under the
-miner's control. The extreme of having a unique position to attack a site is being the
-target, and having the private key for the site. Having this priveleged position allows 
+when miners have different bandwidths to that given endpoint. The extreme of 
+having a different bandwidth is being the target, and having the private key 
+for the site. Having this priveleged position allows 
 the target to actively engage in DDoSCoin as a defense. We discuss this further in
 Section~\ref{sec:defense}.
 
@@ -745,8 +747,6 @@ closed. We believe it important to fully disclose potential attacks, even those 
 require the development of an altcoin to execute. This is especially important in the
 face of the impending commitment to the design of TLS 1.3, and compounded by how long 
 TLS/SSL protocol versions stay in active use.
-
-\shrug
 
 % ¯\_(ツ)_/¯
 
