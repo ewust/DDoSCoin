@@ -271,7 +271,8 @@ collected by minters in Peercoin.
 Miners in DDoSCoin repeatedly create connections to a TLS victim server, and
 check for a response that satisfies a target difficulty decided by the network.
 If the response satisfies this condition, then parameters of the TLS handshake
-can be published by the miner to create a new valid block.
+can be published by the miner to create a new valid block. This connection is
+depicted in Figure~\ref{fig:tls-connection}.
 
 To begin, a miner generates a random 32-byte secret nonce, $N$. The miner also
 selects the latest block in the chain it is mining on, and the set of
