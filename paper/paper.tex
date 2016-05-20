@@ -689,23 +689,45 @@ conditions (no miner running) and under DoS (miner running). As shown in
 Figure~\ref{fig:eval}, we find that the average response time increases by more
 than a factor of 6.
 
-\if0
 \section{Discussion}
 
--Proof of (burnt) bandwidth
--Defenses
--Target server's participation
+%-Proof of (burnt) bandwidth
+%-Defenses
+%-Target server's participation
+
+Cryptocurrencies do good, from decentralizing money to finding primes. But they can do bad.
+
+What is being proved is bandwidth to a given endpoint.
+Unique challenge regarding priveleged position of owning target server.
+What does this means for active engagement as a potential target?
+
+Formalized reliance upon consensus for target-setting is weird
+
+Blockchain forking could enable miner rejection of a target, or rejection of target removal.
+This is true of PAY\_TO\_DDOS and adds risk of placing that transaction in your Merkle tree.
+
+Jumping the gun on PAY\_TO\_DDOS transactions before they find their way into the block chain
+could be weird. Especially if people start only inserting them as they solve the puzzle.
 
 \subsection{Ethical Considerations}
 %¯\\\_(ツ)\_/¯
 %\symbol{2544}
+- Proof-of-work
+
+- Attack websites we own
+
+- Did not publish the full coin
+
+- Bringing to light potential attacks
+
+- Having no alternative cipher suites in TLS 1.3 could be bad before a large committment
+
+
 \shrug
 
 % ¯\_(ツ)_/¯
 
 \subsection{Defenses}
-\fi
-\section{Defenses}
 
 Victim websites can use several methods to defend themselves from
 DDoSCoin miners. First, websites can simply disable TLS 1.2 entirely, and only
@@ -729,7 +751,8 @@ Websites could also attempt to thwart DDoSCoin by participating in the mining
 themselves. Because the victim website will have local access to its private
 key, they will have an advantage over remote clients. With this advantage, the
 victim might be able to mine enough DDoSCoins to mint a proof-of-stake block
-that removes itself from the list.
+that removes itself from the list, or raise the difficulty of mining a block
+high enough that a remote miner has a negligable chance of suceeding.
 
 Finally, websites could attempt to go after mining operations legally.
 Publishing a proof-of-DDoS block in the DDoSCoin blockchain may reveal the
