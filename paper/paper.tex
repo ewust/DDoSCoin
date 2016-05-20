@@ -695,39 +695,63 @@ than a factor of 6.
 %-Defenses
 %-Target server's participation
 
-Cryptocurrencies do good, from decentralizing money to finding primes. But they can do bad.
+Bitcoin was invented with the goal of creating a decentralized digital currency, 
+and to that end has been more sucessful than most imagined. Banks are turning
+to ``Blockchain technology'' to solve issues regarding public ledgers.
+Primecoin and TorPath use cryptocurrencies to incentivize positive actions.
+However, this positivity is not inherent to cryptocurrencies. DDoSCoin demonstrates
+malicousness inherent to the currency's design.
 
-What is being proved is bandwidth to a given endpoint.
-Unique challenge regarding priveleged position of owning target server.
-What does this means for active engagement as a potential target?
+DDoSCoin uses proof that the miner connected to a given server a sufficient number 
+of times as its proof-of-work. This is an indirect measurement of how much bandwidth
+to a given endpoint is being wasted by the miner. This provides a unique challenge
+when miners have different bandwidth to a given endpoint at a level beyond their direct 
+control. In prior cryptocurrencies, the proof-of-work uses resources entirely under the
+miner's control. The extreme of having a unique position to attack a site is being the
+target, and having the private key for the site. Having this priveleged position allows 
+the target to actively engage in DDoSCoin as a defense. We discuss this further in
+Section~\ref{sec:defense}.
 
-Formalized reliance upon consensus for target-setting is weird
+An interesting choice in the design of DDoSCoin is that the target-setting is done 
+dynamically, and by consensus. A given target can go offline, or in some other way
+defend against DDoSCoin at any point. When this happens, the currency cannot stall,
+as then no coins could be transacted. This necessitates dynamic target-setting, 
+despite how strange it may be to have the ``goalposts'' move on miners. This places
+risk in targetting sites that are likely to be removed from the target list, or
+\emph{controversial} sites. However, each site has its difficulty adjusted 
+individually, the controversial site will be easier to mine a block from as more 
+miners shy away, balancing the affect. 
 
-Blockchain forking could enable miner rejection of a target, or rejection of target removal.
-This is true of PAY\_TO\_DDOS and adds risk of placing that transaction in your Merkle tree.
+While stakeholders have control of the target list, a majority of miners could
+use their choice of previous block to veto a given proof-of-stake block. This would
+be a fork of the blockchain. If a clear majority treat a block as malformed because
+it introduces an undesired domain, then the longer chain wins, and the undesired
+domain is not included in the target set, and any blocks mined on the chain with
+the vetoed target are not part of the blockchain.
 
-Jumping the gun on PAY\_TO\_DDOS transactions before they find their way into the block chain
-could be weird. Especially if people start only inserting them as they solve the puzzle.
+%Jumping the gun on PAY\_TO\_DDOS transactions before they find their way into the block chain
+%could be weird. Especially if people start only inserting them as they solve the puzzle.
+\todo{Talk about TLS 1.3, signing client controlled values}
+
 
 \subsection{Ethical Considerations}
 %¯\\\_(ツ)\_/¯
 %\symbol{2544}
-- Proof-of-work
-
-- Attack websites we own
-
-- Did not publish the full coin
-
-- Bringing to light potential attacks
-
-- Having no alternative cipher suites in TLS 1.3 could be bad before a large committment
-
+While we acknowlege this work introduces an idea that could be used to incentivize 
+malicous behavior, the ethics of this paper are controlled. We only demonstrate a 
+proof of concept, and in doing so, only attack websites we have ownership of.
+Further, we do not publish the full coin, and keep the source of our proof of concept
+closed. We believe it important to fully disclose potential attacks, even those that
+require the development of an altcoin to execute. This is especially important in the
+face of the impending commitment to the design of TLS 1.3, and compounded by how long 
+TLS/SSL protocol versions stay in active use.
 
 \shrug
 
 % ¯\_(ツ)_/¯
 
 \subsection{Defenses}
+\label{sec:defense}
 
 Victim websites can use several methods to defend themselves from
 DDoSCoin miners. First, websites can simply disable TLS 1.2 entirely, and only
