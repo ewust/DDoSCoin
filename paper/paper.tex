@@ -403,7 +403,7 @@ DDoSCoin could simply be the server's host key rather than a domain in a
 CA-signed certificate.
 
 Although not yet implemented, the current TLS 1.3 proposal appears to also have the
-necessary properties that enable DDoSCoin. In particular, the
+necessary properties that enable DDoSCoin~\cite{tls-draft}. In particular, the
 Certificate Verify message includes a signature from the server over essentially
 all prior handshake messages, including the Client Hello that contains the
 \texttt{client\_random}. Thus, DDoSCoin could be used against TLS 1.3
@@ -476,8 +476,8 @@ where $txid$ is the transaction ID of the PAY\_TO\_DDOS transaction,
 $output\_script$ is the SHA256 hash of the output script the payee wants to collect the
 payment with, and $N$ is a 32-byte random nonce.  The client then makes connections to the
 specified victim domain until it gets a response that meets the target
-difficulty specified by the PAY\_TO\_DDOS transaction.
-($SHA256(server\_key\_exchange\_params || signature || N) < target$).
+difficulty specified by the PAY\_TO\_DDOS transaction, i.e. the hash of the key exchange 
+parameters, signature, and nonce are less than the target hash value.
 
 To collect the bounty reward, the client creates an input script that will
 satisfy the PAY\_TO\_DDOS output. This includes the parameters of the
@@ -502,11 +502,18 @@ proof-of-DoS and collecting the reward themselves. These properties combined all
 mutually-distrusting parties to directly and safely transact currency in
 exchange for a specified-amount of work in a DoS attack.
 
-
 % Maybe move this to discussion....
+
+
 Since PAY\_TO\_DDOS transactions can be claimed by anyone, there is a risk to
 the collector that by the time they complete their DoS attack, someone else will
-have collected the payment. In addition, a potential victim website could
+have collected the payment. Any target specified by a PAY\_TO\_DDOS transaction
+could use their priveleged position to turn the proof-of-work into a computational challenge.
+Since the challenge is no longer bound by the network, the target can claim the reward for
+themselves. Quickly solved PAY\_TO\_DDOS transactions with no degradation of service
+would indicate to the actor providing the bounty that the target is claiming its own bounty.
+
+In addition, a potential victim website could
 disincentivize attacks by submitting PAY\_TO\_DDOS transactions that they can
 quickly solve locally. This would cause attackers to try to connect to them, and
 eventually even collect a response that meets the target difficulty. However,
@@ -640,7 +647,7 @@ introduces the target in a proof-of-stake block. The stakeholder is incentivized
 set the difficulty too low, as the DDoS would be innefective. Also, many coins would be
 mined quickly, devaluing the stakeholder's own coins. If the difficulty is set too high,
 there will be a delay as other domains are mined, and the difficulty adjusts down
-to the appropriate level.
+to the appropriate level. 
 
 %Proof-of-Stake to decide a delta on the victim-list.
 
