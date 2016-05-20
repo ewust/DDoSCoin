@@ -15,6 +15,21 @@
 \end{figure*}
 }
 
+\newcommand{\FigTLS}{
+\begin{figure*}[ht]
+    \centering
+    \includegraphics[width=0.9\textwidth,clip]{figures/tls.pdf}
+    \caption{\textbf{Miner--Target Interaction}\,--\, %
+	A single round-trip is required for each attempt to solve the proof-of-work. The client
+	computes the \texttt{client\_random} to commit to a given previous block and set of 
+	transactions, and only provides the server the option to use Diffie-Hellman Ephemeral
+	cipher-suites. The server then calculates a signature dependent on the 
+	\texttt{client\_random} and verifiable by the certificate the server provides.
+}
+    \label{fig:tls-connection}
+\end{figure*}
+}
+
 \newcommand{\FigOverview}{
 \begin{figure*}[ht]
     \centering
