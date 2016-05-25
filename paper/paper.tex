@@ -119,7 +119,7 @@ Permacoin is a proposed altcoin that uses a novel
 \emph{proof-of-storage}~\cite{permacoin}.  Rather than waste computational
 resources solving a useless proof-of-work puzzle, such as in Bitcoin, miners are
 instead incentivized to store parts of a large agreed-upon file. In order to be
-competitive in Permacoin, miners prove that they can retreive an assigned
+competitive in Permacoin, miners prove that they can retrieve an assigned
 portion of the file.
 
 In Primecoin, miners search for special chains of prime
@@ -168,7 +168,7 @@ included in the public ledger. To mine a block, a miner must find a hash of a
 block header that is less than an adjustable target. The block header includes
 the hash of the last block found, the Merkle root of the list of transactions
 the miner wants to include in this block, and a nonce. The easiest way to solve
-this puzzle is to iterate the nonce\footnote{or modify transactions, therby
+this puzzle is to iterate the nonce\footnote{or modify transactions, thereby
 changing the Merkle root} until the hash satisfies the target difficulty. Then,
 the miner publishes the found block, and miners use this block as the latest
 block.
@@ -464,7 +464,7 @@ create blocks, but with a few important differences. First, the
 SHA256(txid || output\_script || N)
 \end{equation}
 
-where $txid$ is the transaction ID of the PAY\_TO\_DDOS transaction,
+Where $txid$ is the transaction ID of the PAY\_TO\_DDOS transaction,
 $output\_script$ is the SHA256 hash of the output script the payee wants to collect the
 payment with, and $N$ is a 32-byte random nonce.  The client then makes connections to the
 specified victim domain until it gets a response that meets the target
@@ -505,7 +505,7 @@ exchange for a specified-amount of work in a DoS attack.
 Since PAY\_TO\_DDOS transactions can be claimed by anyone, there is a risk to
 the collector that by the time they complete their DoS attack, someone else will
 have collected the payment. Any target specified by a PAY\_TO\_DDOS transaction
-could use their priveleged position to turn the proof-of-work into a computational challenge.
+could use their privileged position to turn the proof-of-work into a computational challenge.
 Since the challenge is no longer bound by the network, the target can claim the reward for
 themselves. Quickly solved PAY\_TO\_DDOS transactions with no degradation of service
 and sufficiently difficult proof-of-work
@@ -612,7 +612,7 @@ a single domain that handles many connections per second added to the target lis
 The miners would connect to that server more often, since it will give more chances 
 at mining a block, and thus relieve traffic from the other targets.
 
-DDoSCoin adjusts diffuculty for a given domain by looking at the past
+DDoSCoin adjusts difficulty for a given domain by looking at the past
 BLOCK\_ADJUST blocks, and counting the number of blocks mined against
 the given domain. This ratio is compared to the expected ratio based on the
 current size of the victim list. If more blocks were mined than expected, the
@@ -642,7 +642,7 @@ expected will reduce the global difficulty.
 
 A target's initial difficulty in DDoSCoin is decided by the stakeholder that
 introduces the target in a proof-of-stake block. The stakeholder is incentivized to not
-set the difficulty too low, as the DDoS would be innefective. Also, many coins would be
+set the difficulty too low, as the DDoS would be ineffective. Also, many coins would be
 mined quickly, devaluing the stakeholder's own coins. If the difficulty is set too high,
 there will be a delay as other domains are mined, and the difficulty adjusts down
 to the appropriate level. These are similar to the incentives for PAY\_TO\_DDOS 
@@ -694,7 +694,7 @@ and to that end has been more sucessful than most imagined. Banks are turning
 to ``Blockchain technology'' to solve issues regarding public ledgers.
 Primecoin and TorPath use cryptocurrencies to incentivize positive actions.
 However, this positivity is not inherent to cryptocurrencies. DDoSCoin demonstrates
-malicousness inherent to a currency's design, turning the notion of what constitutes
+maliciousness inherent to a currency's design, turning the notion of what constitutes
 a ``useful'' proof-of-work around. Certainly a DDoS attack it useful to someone,
 but negatively impacts society as a whole.
 
@@ -704,7 +704,7 @@ to a given endpoint is being wasted by the miner. This provides a unique challen
 to the currency 
 when miners have different bandwidths to that given endpoint. The extreme of 
 having a different bandwidth is being the target, and having the private key 
-for the site. Having this priveleged position allows 
+for the site. Having this privileged position allows 
 the target to actively engage in DDoSCoin as a defense. We discuss this further in
 Section~\ref{sec:defense}.
 
@@ -738,8 +738,8 @@ TLS 1.3 due to the long life of TLS implementations.
 \subsection{Ethical Considerations}
 %¯\\\_(ツ)\_/¯
 %\symbol{2544}
-While we acknowlege this work introduces an idea that could be used to incentivize 
-malicous behavior, the ethics of this paper are controlled. We only demonstrate a 
+While we acknowledge this work introduces an idea that could be used to incentivize 
+malicious behavior, the ethics of this paper are controlled. We only demonstrate a 
 proof of concept, and in doing so, only attack websites we have ownership of.
 Further, we do not publish the full coin.
 We believe it important to fully disclose potential attacks, even those that
@@ -776,7 +776,7 @@ themselves. Because the victim website will have local access to its private
 key, they will have an advantage over remote clients. With this advantage, the
 victim might be able to mine enough DDoSCoins to mint a proof-of-stake block
 that removes itself from the list, or raise the difficulty of mining a block
-high enough that a remote miner has a negligable chance of suceeding.
+high enough that a remote miner has a negligible chance of succeeding.
 
 Finally, websites could attempt to go after mining operations legally.
 Publishing a proof-of-DDoS block in the DDoSCoin blockchain may reveal the
