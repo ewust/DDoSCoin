@@ -612,22 +612,17 @@ a single domain that handles many connections per second added to the target lis
 The miners would connect to that server more often, since it will give more chances 
 at mining a block, and thus relieve traffic from the other targets.
 
-DDoSCoin adjusts difficulty for a given domain by looking at the past
+DDoSCoin adjusts difficulty for a given domain by looking at the previous
 BLOCK\_ADJUST blocks, and counting the number of blocks mined against
 the given domain. This ratio is compared to the expected ratio based on the
-current size of the victim list. If more blocks were mined than expected, the
+current size of the victim list and the time over which these blocks were mined
+(based on a timestamp included in the blocks). If more blocks were mined than
+expected, the
 difficulty for this domain is increased. Similarly, if fewer blocks were mined,
 the difficulty for the domain is decreased.
 This mechanism allows target domains that somehow become more
 difficult to reach to quickly return to a more appropriate difficulty, without
 having to wait for many blocks mined at the high difficulty. 
-
-At the same time, there is a global difficulty adjustment factor applied to all
-domain difficulties that is computed based only on the number of blocks mined
-over a given time. If blocks are being produced faster than expected, then the
-difficulty on all blocks increases. Likewise, blocks coming in slower than
-expected will reduce the global difficulty.
-
 
 %This comes at a
 %sacrifice to the agility of co when a domain has too low of a
@@ -642,11 +637,12 @@ expected will reduce the global difficulty.
 
 A target's initial difficulty in DDoSCoin is decided by the stakeholder that
 introduces the target in a proof-of-stake block. The stakeholder is incentivized to not
-set the difficulty too low, as the DDoS would be ineffective. Also, many coins would be
+set the difficulty too low, as many coins would be
 mined quickly, devaluing the stakeholder's own coins. If the difficulty is set too high,
 there will be a delay as other domains are mined, and the difficulty adjusts down
-to the appropriate level. These are similar to the incentives for PAY\_TO\_DDOS 
-transactions, mentioned in Section~\ref{sec:pay-to-ddos}.
+to the appropriate level.
+%These are similar to the incentives for PAY\_TO\_DDOS 
+%transactions, mentioned in Section~\ref{sec:pay-to-ddos}.
 
 %Proof-of-Stake to decide a delta on the victim-list.
 
@@ -667,10 +663,11 @@ transactions, mentioned in Section~\ref{sec:pay-to-ddos}.
 To evaluate the performance and effectiveness of DDoSCoin, we implement our
 proof-of-DDoS function in 582 lines of C\@. Our mining code uses
 libevent~\cite{libevent} and OpenSSL~\cite{openssl} to create concurrent
-connections toward a specific target, testing each response to see if it
+connections toward a specific target, crafting a
+\texttt{client\_random} in the specified way and testing each response to see if it
 satisfies a hard-coded proof-of-DDoS target difficulty.
 
-We tested our proof-of-DDoS function (miner) against a quad-core server under
+We tested our proof-of-DDoS function (miner) against a quad-core TLS server under
 our control, running nginx serving the default page and connected to our
 attacker over a local Gigibit Ethernet network. When running our miner, the CPU
 consumption of the server quickly reaches 100\% utilization on all 4 cores,
@@ -679,8 +676,8 @@ produces over 3000 TLS connections per second, and slows response times of the
 webserver considerably. We used Apache benchmark (ab) with 1000 connections with
 a concurrency of 50 to quantify this, and tested the server under normal
 conditions (no miner running) and under DoS (miner running). As shown in
-Figure~\ref{fig:eval}, we find that the average response time increases by more
-than a factor of 6.
+Figure~\ref{fig:eval}, we find that the average server response time increases by more
+than a factor of 6 when our miner is running.
 
 \section{Discussion}
 
@@ -689,24 +686,23 @@ than a factor of 6.
 %-Target server's participation
 
 Many positive results have come from cryptocurrencies.
-Bitcoin was invented with the goal of creating a decentralized digital currency, 
+Bitcoin was invented with the goal of creating a decentralized digital currency,
 and to that end has been more sucessful than most imagined. Banks are turning
 to ``Blockchain technology'' to solve issues regarding public ledgers.
 Primecoin and TorPath use cryptocurrencies to incentivize positive actions.
 However, this positivity is not inherent to cryptocurrencies. DDoSCoin demonstrates
 maliciousness inherent to a currency's design, turning the notion of what constitutes
-a ``useful'' proof-of-work around. Certainly a DDoS attack it useful to someone,
-but negatively impacts society as a whole.
+a ``useful'' proof-of-work around.
 
-DDoSCoin uses proof that the miner connected to a given server a sufficient number 
-of times as its proof-of-work. This is an indirect measurement of how much bandwidth
-to a given endpoint is being wasted by the miner. This provides a unique challenge
-to the currency 
-when miners have different bandwidths to that given endpoint. The extreme of 
-having a different bandwidth is being the target, and having the private key 
-for the site. Having this privileged position allows 
-the target to actively engage in DDoSCoin as a defense. We discuss this further in
-Section~\ref{sec:defense}.
+DDoSCoin uses a proof that the miner has connected to a given server a sufficient number 
+of times as its proof-of-work. This is an indirect measurement of how much
+bandwidth or resources are being spent by the victim. Although miners only
+receive DDoSCoins in return for this effort, these can be traded in for other
+currency via cryptocurrency exchanges. In addition, because DDoSCoin uses
+transactions similar to Bitcoin, trust-less cross-chain transactions can allow
+DDoSCoins to be traded for Bitcoins without requiring a trusted 3rd party
+intermediary. Thus, even outlawing DDoSCoins from exchanges does not prevent a
+black-market from getting around these sanctions.
 
 An interesting choice in the design of DDoSCoin is target-setting is done 
 dynamically, and by consensus. A given target can go offline, or in some other way
@@ -730,7 +726,7 @@ necessary properties that enable DDoSCoin~\cite{tls-draft}. In particular, the
 Certificate Verify message includes a signature from the server over essentially
 all prior handshake messages, including the Client Hello that contains the
 \texttt{client\_random}. Thus, DDoSCoin could be used against TLS 1.3
-servers with only minor modifications. This should be considered in the design of 
+servers with only minor modifications. This should be considered in the design of
 TLS 1.3 due to the long life of TLS implementations.
 
 
@@ -739,14 +735,18 @@ TLS 1.3 due to the long life of TLS implementations.
 %¯\\\_(ツ)\_/¯
 %\symbol{2544}
 While we acknowledge this work introduces an idea that could be used to incentivize 
-malicious behavior, the ethics of this paper are controlled. We only demonstrate a 
-proof of concept, and in doing so, only attack websites we have ownership of.
-Further, we do not publish the full coin.
+malicious behavior, we have taken precautions to limit harm. First, in
+demonstrating our proof-of-concept and evaluating our proof-of-DDoS code, we
+have only ``attacked'' websites we have ownership and authority over.
+Further, we are not publishing a working alt-coin that uses this proof-of-DDoS,
+but rather a conceptual description of one.
 We believe it important to fully disclose potential attacks, even those that
 require the development of an altcoin to execute. This is especially important in the
-face of the impending commitment to the design of TLS 1.3, and compounded by how long 
-TLS/SSL protocol versions stay in active use. Further, proof-of-DDoS has applications 
-beyond just DDoSCoin.
+face of the impending commitment to the design of TLS 1.3, and compounded by how long
+TLS/SSL protocol versions stay in active use.
+
+%Further, proof-of-DDoS has applications 
+%beyond just DDoSCoin.
 
 % ¯\_(ツ)_/¯
 
@@ -770,6 +770,17 @@ that as long as the server's private key is accessible, any previously recorded
 TLS connections could be decrypted. We note that the current drafts of TLS 1.3
 propose to remove non-forward secure cipher suites entirely, possibly making it
 more difficult to defend against DDoSCoin in TLS 1.3.
+
+Although dramatically changing existing deployed versions of TLS is unrealistic, it may still
+be possible to influence the design of the TLS 1.3 standard to make it
+incompatible with DDoSCoin. For example, rather than having the server sign all
+of the handshake messages (including those from the client), the server could
+sign only the handshake messages which it sent. This may not fully mitigate
+DDoSCoin, as some of the parameters (such as the selected cipher suite or
+elliptic curves) may have originally been provided by the client. We note that
+while the server signing only its own messages still mitigates many previous
+known bugs such as those revealed in the FREAK TLS attack, there may be other subtle bugs that are
+exposed by servers not signing client's messages.
 
 Websites could also attempt to thwart DDoSCoin by participating in the mining
 themselves. Because the victim website will have local access to its private
