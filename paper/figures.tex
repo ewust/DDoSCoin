@@ -4,7 +4,7 @@
 \begin{figure*}[ht]
     \centering
     \includegraphics[width=0.9\textwidth,trim={0 6.5cm 1cm 0},clip]{btc-transaction.pdf}
-    \caption{\textbf{Standard Bitcoin transaction script}\,--\, %
+    \caption{\textbf{Standard Bitcoin transaction script}\,---\, %
             Transaction \#10 spends \#9 by providing a
             valid input script that when prepended to Transaction \#9's output script,
             executes to produce a valid output. The output script stores a hash of a
@@ -19,7 +19,7 @@
 \begin{figure*}[ht]
     \centering
     \includegraphics[width=0.9\textwidth,clip]{figures/tls.pdf}
-    \caption{\textbf{Miner--Target Interaction}\,--\, %
+    \caption{\textbf{Miner--Target Interaction}\,---\, %
 	A single round-trip is required for each attempt to solve the proof-of-work. The client
 	computes the \texttt{client\_random} to commit to a given previous block and set of 
 	transactions, and only provides the server the option to use Diffie-Hellman Ephemeral
@@ -34,7 +34,7 @@
 \begin{figure*}[ht]
     \centering
     \includegraphics[width=0.9\textwidth,trim={0 9.5cm 9.2cm 0},clip]{ddoscoin-overview.pdf}
-    \caption{\textbf{DDoSCoin Design}\,--\, %
+    \caption{\textbf{DDoSCoin Design}\,---\, %
     DDoSCoin miners make repeated connections to a victim server running TLSv1.2
 \numcircledmod{1}. In each handshake, the miner commits to the previous block, a transaction
 merkle root, and a secret nonce. Eventually the victim server will respond with
@@ -53,7 +53,7 @@ blocks \numcircledmod{4}.}
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.9\linewidth]{../data/times.pdf}
-    \caption{\textbf{DDoSCoin effect}\,--\, %
+    \caption{\textbf{DDoSCoin effect}\,---\, %
     We set up a quad-core nginx HTTPS server on a local network, and used Apache
 benchmark (ab) to measure page load times under normal conditions (no DDoSCoin
 miner running) and with a single DDoSCoin instance. DDoSCoin increases the

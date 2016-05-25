@@ -92,7 +92,7 @@ protocol. Rather than specify a single website or static list that DDoSCoin
 miners target, choosing them by consensus allows the choice of who is attacked
 to be made collectively and fairly by DDoSCoin participants.
 
-\emph{Contributions}
+\noindent\textbf{Contributions:}
 \begin{itemize}
 \item Propose a novel conceptual cryptocurrency, DDoSCoin, whose proof-of-work
 incentives miners to participate in a DDoS attack, and allows them prove they have done so
@@ -304,13 +304,13 @@ parameters that are not needed for the purposes of DDoSCoin.
 Next, the server sends its certificate chain, and a server key exchange message.
 The certificate chain contains the server's signed TLS certificate, as well as
 intermediate certificate authorities that create a signature chain to a
-browser-trusted root CA. Inside the server's certificate is a public
+browser-trusted root CA\@. Inside the server's certificate is a public
 key, as well as the identity of the server represented by it's domain. The miner stores
 these for verification in case a block is found.
 
 In the server key exchange message, the server sends key exchange parameters
 such as the Diffie-Hellman parameters and the ephemeral public value generated
-by the server, or the curve parameters and a public curve point in ECDHE. The
+by the server, or the curve parameters and a public curve point in ECDHE\@. The
 server signs these key exchange parameters, along with the
 \texttt{client\_random} and \texttt{server\_random}. This signature can be
 verified with the public key in the certificate.
@@ -492,7 +492,7 @@ the reward.
 There are a couple important features of this transaction. First, the reason the
 transaction ID of the PAY\_TO\_DDOS transaction is included (committed to) in
 the \texttt{client\_random} is to prevent a client from ``double-claiming''
-multiple bounty rewards with the same proof-of-DoS. Similarly, the client
+multiple bounty rewards with the same proof-of-DoS\@. Similarly, the client
 commits to the output script of the claiming transaction to
 prevent others from being able to swap it for their own, thereby ``stealing'' the
 proof-of-DoS and collecting the reward themselves. These properties combined allow two
@@ -665,7 +665,7 @@ transactions, mentioned in Section~\ref{sec:pay-to-ddos}.
 \FigEval
 
 To evaluate the performance and effectiveness of DDoSCoin, we implement our
-proof-of-DDoS function in 582 lines of C. Our mining code uses
+proof-of-DDoS function in 582 lines of C\@. Our mining code uses
 libevent~\cite{libevent} and OpenSSL~\cite{openssl} to create concurrent
 connections toward a specific target, testing each response to see if it
 satisfies a hard-coded proof-of-DDoS target difficulty.
