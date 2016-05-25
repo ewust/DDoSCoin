@@ -35,7 +35,7 @@ proof-of-work is a computational puzzle based on the SHA256 hash function, and
 miners are tasked with finding a partial preimage. The best way to do this is to
 iterate over a large number of inputs to the hash function, and check if the
 output hash satisfies the partial preimage target. In simplified terms, to find
-an input that hashes to N bits of 0s, the miner must perform on average $2^{N}$
+an input that hashes to N bits of zeros, the miner must perform on average $2^{N}$
 hashes. Once such an input is found, other miners and Bitcoin nodes can verify the
 puzzle solution with a single hash~\footnote{Bitcoin uses double-SHA256 in its
 design, but this detail is not important for the purposes of this paper.}.
@@ -70,13 +70,13 @@ in a decentralized DDoS attack.
 The malicious ``proof-of-DDoS'' operates by having miners create a large number of
 TLS connections to a target webserver, and using the server's signed responses
 as a proof of connection. In modern versions of TLS, the server signs a
-client-provided parameter of the connection, along with server-provided values
+client-provided parameter during the handshake, along with server-provided values
 used in the key exchange of the connection. This allows the client to prove to
 others that it has communicated with the server. In addition, the signed value
 returned by the server is not predictable to the client, and is randomly
-distributed. Thus, clients can use a similar trick to those in Bitcoin, and only
+distributed. Thus, clients can use a similar trick as in Bitcoin, and only
 report connections that match some rare threshold, such as the signature from
-the server starts with $N$ bits of 0s. On average, it will take clients $2^{N}$
+the server starts with $N$ bits of zeros. On average, it will take clients $2^{N}$
 connections to produce such a proof.
 
 Although the malicious proof-of-DDoS only works against websites that support
@@ -110,7 +110,7 @@ victims can employ
 
 Many alternate cryptocurrency protocols have been proposed since the
 creation of Bitcoin. Although none have yet eclipsed the popularity of Bitcoin,
-many altcoins have interesting innovations, often in the form of alternate
+many so-called altcoins have interesting innovations, often in the form of alternate
 proof-of-work. For example, Litecoin uses scrypt in place of SHA256 in its
 proof-of-work, with the intention of being ``ASIC-resistant'' in order to allow
 anyone to mine competitively with only a CPU~\cite{litecoin}.
@@ -124,16 +124,16 @@ portion of the file.
 
 In Primecoin, miners search for special chains of prime
 numbers~\cite{primecoin}. Although Primecoin has found several large Cunningham
-and bi-twin chains, it remains unclear if such primes have any practical use.
+and bi-twin prime chains, it remains unclear if such primes have any practical use.
 
 TorPath proposes a proof-of-bandwidth altcoin that incentivizes users to
 participate in the Tor Network~\cite{torpath}. However, it relies on a set of
 semi-trusted centralized servers to assign Tor circuits to clients. It is also
-susceptible to collusion and sybil attacks by participants, however many of
+susceptible to collusion and Sybil attacks by participants, however many of
 these attacks are outside the threat model of TorPath, as it requires performing
 those attacks against the underlying Tor network. In contrast, DDoSCoin does not
 require any centralized parties for the proof-of-DDoS, besides trusting existing
-certificate authorities to validate domains.
+TLS certificate authorities to validate domains.
 
 Although Bitcoin uses a scripting language for transactions (see
 Section~\ref{sec:scripting}), the allowed operations are very
@@ -145,7 +145,7 @@ contracts does not provide external network access to the scripts, it could
 still be used to implement some parts of DDoSCoin. For example, it is possible
 to create an Ethereum contract that pays a bounty to anyone that can provide a
 proof-of-DDoS for a specified target. This would effectively accomplish the same
-outcome as PAY\_TO\_DDOS (described in Section~\ref{sec:pay-to-ddos}), and
+outcome as PAY\_TO\_DDOS (described in Section~\ref{sec:pay-to-ddos}) by
 implementing DDoSCoin's proof-of-DDoS verification.
 
 %Other interesting proofs-of-work?  Botnet-as-a-service?
@@ -173,7 +173,7 @@ changing the Merkle root} until the hash satisfies the target difficulty. Then,
 the miner publishes the found block, and miners use this block as the latest
 block.
 
-Each block commits to a set of transactions, which each must be valid for the
+Each block commits to a set of transactions, where each must be valid for the
 block to be considered valid. Transactions in Bitcoin are scripts, and each new
 transaction specifies an \emph{output script} that must be satisfied in order
 for the coins
@@ -254,7 +254,7 @@ after 90-days are counted as 90-day-old coins. This prevents very old
 coin-holders from being able to disrupt the blockchain at a future date,
 potentially causing a large fork of the blockchain and destabilizing it.
 
-When a proof-of-stake is minted, the minter is allowed to collect a small
+When a proof-of-stake block is minted, the minter is allowed to collect a small
 subsidy proportional to the coin-age consumed in their proof-of-stake
 transaction. This serves as the only reward for a minter, as transaction fees are not
 collected by minters in Peercoin.
