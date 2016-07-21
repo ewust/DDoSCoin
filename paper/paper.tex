@@ -95,7 +95,7 @@ to be made collectively and fairly by DDoSCoin participants.
 \noindent\textbf{Contributions:}
 \begin{itemize}
 \item Propose a novel conceptual cryptocurrency, DDoSCoin, whose proof-of-work
-incentives miners to participate in a DDoS attack, and allows them prove they have done so
+incentives miners to participate in a DDoS attack, and allows them to prove they have done so
 \item Describe a way for target victims to be chosen by consensus of its
 participants
 \item Implement our proof-of-work function and evaluate its performance and
@@ -117,7 +117,7 @@ anyone to mine competitively with only a CPU~\cite{litecoin}.
 
 Permacoin is a proposed altcoin that uses a novel
 \emph{proof-of-storage}~\cite{permacoin}.  Rather than waste computational
-resources solving a useless proof-of-work puzzle, such as in Bitcoin, miners are
+resources solving a useless proof-of-work puzzle (such as in Bitcoin), miners are
 instead incentivized to store parts of a large agreed-upon file. In order to be
 competitive in Permacoin, miners prove that they can retrieve an assigned
 portion of the file.
@@ -207,7 +207,7 @@ is a measure of the product of the amount of coins spent in a transaction, and
 the number of days since they were last spent. For example, to consume 10
 coin-days, a currency holder can spend 10 Peercoin that they have held for a
 day, or equivalently, spend 5 Peercoins that were last spent 2 days ago. Note
-that the holder can send these coins to anyone, including themselves, in order
+that the holder can send these coins to anyone---including themselves---in order
 to consume the coin age.
 
 To mint a new block, a minter creates a special transaction, presumably one
@@ -325,7 +325,7 @@ miner-chosen nonce $N$ is less than the current target difficulty, then this
 connection satisfies the proof-of-work threshold, and can be used to form the
 next block. We hash $N$ a second time in this way to prevent the victim server
 from being able to tell if their response would satisfy the target difficulty.
-Otherwise, servers could simply withhold such responses, and no blocks could be
+Otherwise, servers could simply withhold such infrequent responses, and no blocks could be
 published for them.
 
 To make a block, the miner publishes the previous block's hash, the transactions
@@ -815,6 +815,13 @@ challenge. In this direction, DDoSCoin delivers a novel technique for proving
 the use of bandwidth to a (potentially unwilling) target domain. We hope that
 this work encourages others to discover and innovate on novel proof-of-resource
 puzzles.
+
+\section*{Acknowledgements}
+
+The authors are grateful for the support and various discussions on DDoSCoin. We
+thank David Adrian, Matt Bernhard, and Drew Springall for their discussions
+concerning the feasibility of the proof-of-DDoS idea. We also thank the
+anonymous reviewers for their helpful feedback.
 
 {\footnotesize\balance
 \bibliographystyle{plain}
