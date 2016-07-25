@@ -453,7 +453,7 @@ In order to allow victims to be (temporarily) selected for DoS, DDoSCoin allows
 introduces a new payment opcode, PAY\_TO\_DDOS, that can be used in transactions
 subject to certain constraints. This opcode takes two arguments in an output
 script: a string representing a domain name that the payer wishes to have
-DDoSed, and a target difficulty corresponding to the amount of connections the
+attacked, and a target difficulty corresponding to the amount of connections the
 payer wishes to be made. Once this transaction is stored in a valid block,
 anyone can collect its reward by creating a connection to the specified victim
 server and obtaining a response that meets the given target difficulty. These
@@ -490,7 +490,7 @@ transaction is valid and can be included in a block, letting the client collect
 the reward.
 
 There are a couple important features of this transaction. First, the reason the
-transaction ID of the PAY\_TO\_DDOS transaction is included (committed to) in
+transaction ID of the PAY\_TO\_DDOS transaction is committed to in
 the \texttt{client\_random} is to prevent a client from ``double-claiming''
 multiple bounty rewards with the same proof-of-DoS\@. Similarly, the client
 commits to the output script of the claiming transaction to
@@ -509,7 +509,7 @@ could use their privileged position to turn the proof-of-work into a computation
 Since the challenge is no longer bound by the network, the target can claim the reward for
 themselves. Quickly solved PAY\_TO\_DDOS transactions with no degradation of service
 and sufficiently difficult proof-of-work
-would indicate to the bounty provider that the target is claiming its bounty.
+could indicate to the bounty provider that the target is claiming its bounty.
 
 In addition, a potential victim website could
 disincentivize attacks by submitting PAY\_TO\_DDOS transactions that they can
@@ -660,7 +660,7 @@ to the appropriate level.
 
 \FigEval
 
-To evaluate the performance and effectiveness of DDoSCoin, we implement our
+To evaluate the performance and effectiveness of DDoSCoin, we implemented our
 proof-of-DDoS function in 582 lines of C\@. Our mining code uses
 libevent~\cite{libevent} and OpenSSL~\cite{openssl} to create concurrent
 connections toward a specific target, crafting a
@@ -699,12 +699,12 @@ of times as its proof-of-work. This is an indirect measurement of how much
 bandwidth or resources are being spent by the victim. Although miners only
 receive DDoSCoins in return for this effort, these can be traded in for other
 currency via cryptocurrency exchanges. In addition, because DDoSCoin uses
-transactions similar to Bitcoin, trust-less cross-chain transactions can allow
+transactions similar to Bitcoin, trust-less (atomic) cross-chain transactions can allow
 DDoSCoins to be traded for Bitcoins without requiring a trusted 3rd party
 intermediary. Thus, even outlawing DDoSCoins from exchanges does not prevent a
 black-market from getting around these sanctions.
 
-An interesting choice in the design of DDoSCoin is target-setting is done 
+An interesting choice in the design of DDoSCoin is target-setting is done
 dynamically, and by consensus. A given target can go offline, or in some other way
 defend against DDoSCoin at any point. When this happens, the currency cannot stall,
 as then no coins could be transacted. This necessitates dynamic target-setting.
@@ -715,7 +715,7 @@ be a fork of the blockchain. If a clear majority treat a block as malformed beca
 it introduces an undesired domain, then the longer chain wins, and the undesired
 domain is not included in the target set, and any blocks mined on the chain with
 the vetoed target are not part of the blockchain. This allows the miners to coordinate
-and self-enforce a blacklist, or whitelist, of target domains, so long as they 
+and self-enforce a blacklist, or whitelist, of target domains, so long as they
 have sufficient participation in the policy.
 
 %Jumping the gun on PAY\_TO\_DDOS transactions before they find their way into the block chain
@@ -738,9 +738,9 @@ While we acknowledge this work introduces an idea that could be used to incentiv
 malicious behavior, we have taken precautions to limit harm. First, in
 demonstrating our proof-of-concept and evaluating our proof-of-DDoS code, we
 have only ``attacked'' websites we have ownership and authority over.
-Further, we are not publishing a working alt-coin that uses this proof-of-DDoS,
+Furthermore, we are not publishing a working alt-coin that uses this proof-of-DDoS,
 but rather a conceptual description of one.
-We believe it important to fully disclose potential attacks, even those that
+We believe it is important to fully disclose potential attacks, even those that
 require the development of an altcoin to execute. This is especially important in the
 face of the impending commitment to the design of TLS 1.3, and compounded by how long
 TLS/SSL protocol versions stay in active use.
@@ -818,10 +818,11 @@ puzzles.
 
 \section*{Acknowledgements}
 
-The authors are grateful for the support and various discussions on DDoSCoin. We
-thank David Adrian, Matt Bernhard, and Drew Springall for their discussions
-concerning the feasibility of the proof-of-DDoS idea. We also thank the
-anonymous reviewers for their helpful feedback.
+The authors are grateful for the support and various discussions from our
+colleagues on DDoSCoin. In particular, the authors wish to thank David Adrian,
+Matt Bernhard, and Drew Springall for their discussions concerning the
+feasibility of the proof-of-DDoS idea. We also thank the anonymous reviewers
+for their helpful feedback.
 
 {\footnotesize\balance
 \bibliographystyle{plain}
